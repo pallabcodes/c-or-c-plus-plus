@@ -1,9 +1,23 @@
+#include <cmath>
 #include <iostream>
 #include <string>
+// #include <vector>
 
 using namespace std;
 
+// Abstract Base class for an Employee
+class Employee {
+  int id;
+  string name;
+  double salary;
+
+public:
+  Employee(string name, int id, double salary)
+      : name(name), id(id), salary(salary) {}
+};
+
 // This is an abstract class
+
 class AbstractEmployee {
 public:
   // Abstract method that derived classes must implement
