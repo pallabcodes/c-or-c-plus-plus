@@ -2,7 +2,6 @@
 // #include This particular library i.e. "iostream" is used for input and output
 // streams and it will let us to use std::cout to print
 #include <iostream>
-#include <ostream>
 #include <string> // Required for using std::string
 #include <vector>
 
@@ -19,13 +18,10 @@ class Student {
   int mId = 1;
   float mAverage = 10.10;
 
-public:
-  // this is the default construtctor
   Student() {}
 
   Student(string first, string last, int id, float avg)
       : mFirst(first), mLast(last), mId(id), mAverage(avg) {}
-
 };
 
 // N.B: now, this below main function could be though of as similart psvm in
