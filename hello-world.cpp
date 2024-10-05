@@ -26,7 +26,7 @@ public:
   Student(string first, string last, int id, float avg)
       : mFirst(first), mLast(last), mId(id), mAverage(avg) {}
 
-}
+};
 
 // N.B: now, this below main function could be though of as similart psvm in
 // java N.B: Each c++ program must have a main function which is run when the
