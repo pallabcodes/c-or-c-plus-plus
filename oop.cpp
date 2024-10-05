@@ -1,85 +1,76 @@
 #include <iostream>
+#include <string>
 
 using namespace std;
 
 // This is an abstract class
 class AbstractEmployee {
-  // whichever class extends it, it's obligatory to implement askForPermission (that is ensured by `virtual`) & so now is an abstract method
-  virtual void askForPermission() = 0;
+public:
+  // Abstract method that derived classes must implement
+  virtual void askForPermission() = 0; // Pure virtual function
 };
 
-// So, here Student inherit from the AbstractEmployee
-class Student:AbstractEmployee {
-  // N.B: by default attributes are private
-  // string name;
-  // int age;
+// So, here Student inherits from the AbstractEmployee
+class Student : public AbstractEmployee {
+public:
+  string name;
 
-  // This is just being explicit , this does same as above
-  // private:
-  //         string name;
-  //         int age;
+private:
+  string address;
+  int rollNo;
+  string dept;
+  int age; // Added age for the permission logic
 
-  private:
-        string address;
-        int rollNo;
-        string dept;
+public:
+  // Constructor
+  Student(string name, string address, int rollNo, string dept, int age)
+      : name(name), address(address), rollNo(rollNo), dept(dept), age(age) {}
 
-  protected:
-        string name;
+  // Implementation of the abstract method
+  void askForPermission() override {
+    if (age > 30) {
+      cout << "Getting promoted" << endl;
+    } else {
+      cout << "Negotiating" << endl;
+    }
+  }
 
-  public:
-        Employee(string name, string address, int rollNo, intn deptNo) {
-          name = name;
-          address = address;
-          rollNo = rollNo;
-          dept = deptNo;
-        }
+  void introduceYourself() { cout << "Hello, My name is " << name << endl; }
 
-        void askForPermission() {
-          if (age > 30) {
-            cout << "getting promoted" << endl;
-          } else {
-            cout << "negotiating" << endl;
-          }
-        }
+  // Setter
+  void setName(string name) { this->name = name; }
 
-        void introduceYourself() {
-          cout << "Hello, " << "My name is " << name << endl;
-        }
-
-        // setter
-        void setName(string name) {
-          name = name;
-        }
-
-        // getter
-        string getName() {
-          return name;
-        }
+  // Getter
+  string getName() { return name; }
 };
 
-class Developer:Employee {
-  public:
-       string favoriteProgrammingLang;
+class Developer : public Student {
+public:
+  string favoriteProgrammingLang;
 
-       Developer(string name, string address, int rollNo, intn deptNo, string favoriteProgrammingLang) {
-          :Employee(name, address, rollNo, deptNo);
-          favoriteProgrammingLang = favoriteProgrammingLang;
-       }
+  // Constructor
+  Developer(string name, string address, int rollNo, string dept,
+            string favoriteProgrammingLang, int age)
+      : Student(name, address, rollNo, dept, age),
+        favoriteProgrammingLang(favoriteProgrammingLang) {}
 
-       void fixBug () {
-        cout << name << " Fixed the bug using " << favoriteProgrammingLang << endl;
-       }
+  void fixBug() {
+    cout << name << " fixed the bug using " << favoriteProgrammingLang << endl;
+  }
+};
 
-}
+int main() {
+  // Creating instances of Student
+  Student student1("John", "Boston", 30, "Wrestling", 29);
+  Student student2("Jose", "Madrid", 20, "Football", 25);
 
-int main (int argc, char *argv[]) {
-  Employee employee1 = Employee("John", "Boston", 30, "Wrestling");
-  Employee employee2 = Employee("Jose", "Madrid", 20, "Football");
+  // Demonstrating functionality
+  student1.askForPermission();
+  student2.introduceYourself();
 
-  employee1.askForPermission();
-  employee2.introduceYourself();
-
-  Developer developer = new Developer('Johnson', 'UK', 40, 'Engineering', 'Java')
+  // Creating an instance of Developer
+  Developer developer("Johnson", "UK", 40, "Engineering", "C++", 35);
   developer.fixBug();
-};
+
+  return 0;
+}
