@@ -1,16 +1,8 @@
-https://www.youtube.com/watch?v=gSubXB3HUgc&t=347s&ab_channel=DaveChurchill
+# Data Types: https://www.javatpoint.com/cpp-data-types
 
-https://www.youtube.com/@SavvyNik/videos
+# Does c++ use package manager like npm or such ?
 
-https://www.youtube.com/watch?v=IH4C9d4s9M4&ab_channel=kandodev
-
-https://www.youtube.com/watch?v=w0WzxUPtKf0&t=25s&ab_channel=AverageNeovimEnjoyer
-
-https://www.youtube.com/@cococry/videos
-
-https://www.youtube.com/watch?v=ZjMzBd1Dqz8&ab_channel=TheRadLectures
-
-https://www.youtube.com/watch?v=nzRnWUjGJl8&t=675s&ab_channel=CppCon
+[READ]: https://stackoverflow.com/questions/27866965/does-c-have-a-package-manager-like-npm-pip-gem-etc
 
 # How to compile & run a c++ program e.g. hello-world.cpp?
 

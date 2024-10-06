@@ -1,4 +1,4 @@
-// Just like Java, JavaScript and pythong has import, similary with C++ it is
+// Just like Java, JavaScript and python has import, similary with C++ it is
 // #include This particular library i.e. "iostream" is used for input and output
 // streams and it will let us to use std::cout to print
 #include <iostream>
@@ -24,13 +24,13 @@ class Student {
       : mFirst(first), mLast(last), mId(id), mAverage(avg) {}
 };
 
-// N.B: now, this below main function could be though of as similart psvm in
+// N.B: now, this below main function could be though of as similar psvm in
 // java N.B: Each c++ program must have a main function which is run when the
 // program starts argc = no of arguments, argv = array of arguments (similar to
 // string args[] in java)
 // N.B: on the "main" method both parameters are
 int main(int argc, char *argv[]) {
-  // std is a namespace that containts the cout output stream
+  // std is a namespace that contains the cout output stream
   // << could be though of as whatever value at right of << will be send to the
   // namespace:method i.e. std::cout So, once again << takes the values from the
   // right and sends them to the output stream i.e. std::cout and std::count
