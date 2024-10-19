@@ -68,7 +68,7 @@ int main()
     // If you want ptr2 to be int*, and assuming arr elements are properly initialized:
     // int *ptr2 = arr[2]; // This would be correct if arr[2] was initialized
 
-    int value = **ptr2;  // This would get the int value, if arr[2] was initialized
+    int value = **ptr2; // This would get the int value, if arr[2] was initialized
 
     cout << "ptr2: " << ptr2 << "actual value: " << value << endl;
 

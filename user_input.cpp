@@ -9,5 +9,3 @@ int main()
     cout << "You entered: " << num << endl;
     return 0;
 }
-
-// https://www.javatpoint.com/cpp-basic-input-output
