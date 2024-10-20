@@ -9,3 +9,4 @@
 STEP 1: g++ hello-world.cpp -o hello-world
 STEP 2: ./hello-world
 
+## (REVIEW): pointers, oop, stl and exceptions
