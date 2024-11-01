@@ -8,6 +8,8 @@ int doublePriority()
     double num2;
     // This is known as type promotion. since, double has a higher rank or priority
     cout << sizeof(num1 + num2);
+
+    return 0;
 }
 
 int size()
@@ -41,9 +43,9 @@ int size()
     return 0;
 }
 
-void fun(int arr[])
+void fun(int arr[], int size)
 {
-    cout << "Size of array is : " << sizeof(arr) << endl;
+    cout << "Size of array is : " << size << endl;
 }
 
 class Base
@@ -150,7 +152,7 @@ int main()
     cout << "Size of the array 'digits' is : " << sizeof(digits) << endl;
 
     // so, when an array is given as argument like here, it will internally & implicitly turned into a pointer, so on `64 bit system it's 8 bytes and 32-bits it's 4 bytes`
-    fun(digits);
+    fun(digits, sizeof(digits) / sizeof(digits[0]));
 
     size();
 
