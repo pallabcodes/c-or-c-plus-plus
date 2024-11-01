@@ -54,3 +54,5 @@ int main()
 // https: // www.javatpoint.com/cpp-memory-management
 // https: // www.javatpoint.com/malloc-vs-new-in-cpp
 // https: // www.javatpoint.com/free-vs-delete-in-cpp
+// https: // www.youtube.com/watch?v=Dkn4EKL2xSE&ab_channel=AlphaBrainsCourses
+// https: // www.youtube.com/watch?v=Dkn4EKL2xSE&ab_channel=AlphaBrainsCourses
