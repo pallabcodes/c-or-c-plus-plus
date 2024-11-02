@@ -10,3 +10,17 @@ STEP 1: g++ hello-world.cpp -o hello-world
 STEP 2: ./hello-world
 
 ## (REVIEW): pointers, oop, stl and exceptions
+
+## Math for a SDE:
+
+1. Linear and Boolean algebra (Matrix Multiplication, Linear transformation and logic gates)
+
+2. Number Theory
+
+3. Logs and Exponential
+
+4. Factorials
+
+5. Modulo operations
+
+6. Permutation and combination and link between factorial and permutation
