@@ -2,6 +2,22 @@
 
 using namespace std;
 
+#include <iostream>
+
+// Array traversal
+
+int main()
+{
+  int arr[5] = {1, 2, 3, 4, 5}; // Fixed-size array of 5 elements
+
+  // Calculate length of the array
+  size_t length = sizeof(arr) / sizeof(arr[0]);
+
+  std::cout << "Length of the array: " << length << std::endl;
+
+  return 0;
+}
+
 int nestedLoop()
 {
   for (int i = 1; i <= 3; i++)
