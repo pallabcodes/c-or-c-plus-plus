@@ -1,0 +1,5 @@
+Mathematics algorithms work with:
+1. Numbers
+   - Example: Prime Numbers, GCD, LCM.
+2. Arrays
+   - Example: Modular Arithmetic Problems.
