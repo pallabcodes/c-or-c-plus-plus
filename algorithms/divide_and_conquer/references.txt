@@ -1,0 +1,13 @@
+Divide and Conquer works well with:
+
+1. Arrays
+   - Example: Merge Sort, Closest Pair Problem.
+
+2. Strings
+   - Example: Longest Palindromic Substring (recursive).
+
+3. Trees
+   - Example: Binary Tree Traversals (recursive approaches).
+
+4. Graphs (in rare cases)
+   - Example: Divide and Conquer MST (on special types of graphs).

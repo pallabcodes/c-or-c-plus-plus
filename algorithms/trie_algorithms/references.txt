@@ -1,0 +1,5 @@
+Trie works well with:
+
+1. Strings
+   - Example: Word Search, Prefix Matching.
+2. Trees (Trie is a specialized tree structure).

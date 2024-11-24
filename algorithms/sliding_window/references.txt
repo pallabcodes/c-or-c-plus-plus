@@ -1,0 +1,8 @@
+Sliding Window works well with:
+
+1. Arrays
+   - Example: Maximum Subarray Sum (Kadane’s Algorithm).
+2. Strings
+   - Example: Minimum Window Substring.
+3. Deques
+   - Example: Sliding Window Maximum (optimized version).

@@ -1,0 +1,7 @@
+Union-Find works well with:
+
+1. Graphs
+   - Example: Connected Components, Kruskal’s Algorithm.
+
+2. Grids (2D Arrays)
+   - Example: Number of Islands, Percolation Problems.

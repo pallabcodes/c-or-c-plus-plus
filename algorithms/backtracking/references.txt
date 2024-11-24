@@ -1,0 +1,16 @@
+Backtracking works well with:
+
+1. Arrays
+   - Example: Subset Sum Problem.
+
+2. Strings
+   - Example: Permutations and Combinations of Characters.
+
+3. Grids
+   - Example: N-Queens Problem, Sudoku Solver.
+
+4. Graphs
+   - Example: Hamiltonian Path, Graph Coloring.
+
+5. Trees
+   - Example: All Root-to-Leaf Paths in a Binary Tree.

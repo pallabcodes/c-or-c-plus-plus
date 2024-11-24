@@ -1,0 +1,7 @@
+Monotonic Stack works well with:
+
+1. Arrays
+   - Example: Next Greater Element.
+2. Stacks
+   - Example: Histogram Area Problems.
+3. Linked Lists (after converting to arrays).

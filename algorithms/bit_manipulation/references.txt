@@ -1,0 +1,5 @@
+Bit Manipulation works well with:
+1. Integers
+   - Example: Single Number, Power of Two.
+2. Arrays
+   - Example: Subset Generation Using Bitmasking.
