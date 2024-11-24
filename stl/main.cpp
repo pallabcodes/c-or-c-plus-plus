@@ -359,8 +359,6 @@ void explainUMap()
     // same as the map, but UNSORTED
 }
 
-void
-
 // Additional utility functions
 void printVector(vector<int> &v)
 {
