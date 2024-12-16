@@ -33,7 +33,7 @@ vector<int> getLeadersBruteForce(vector<int> &arr)
   return res;
 }
 
-// Optimized: O(n), space: O(1)
+// Optimized: O(n), space: O(1) (uses the reversal traversal algorithm here for optimization)
 vector<int> getLeadersOptimized(vector<int> &arr)
 {
   int n = arr.size();

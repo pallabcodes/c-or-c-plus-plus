@@ -3,14 +3,17 @@
 using namespace std;
 
 // Function that takes an array and its size, printing each element
-void fun(int arr[], int size) {
-    for (int i = 0; i < size; ++i) {
+void fun(int arr[], int size)
+{
+    for (int i = 0; i < size; ++i)
+    {
         cout << arr[i] << " ";
     }
     cout << endl;
 }
 
-int main() {
+int main()
+{
     int digit = 30;
     int *p = nullptr; // Initialize pointer to null for safety
 
@@ -22,7 +25,7 @@ int main() {
 
     cout << "Address of digit variable is: " << &digit << endl;
     cout << "Address stored in p: " << p << endl;
-    cout << "Value at p (digit's value): " << *p << endl;
+    cout << "Value at p (digit's value): " << *p << endl; // dereference to get the actual value from p (i.e. a a pointer variable)
 
     // Swapping values of two variables using pointers
     int a = 20;
@@ -39,7 +42,7 @@ int main() {
     cout << "After swap: *p1=" << *p1 << " *p2=" << *p2 << endl;
 
     // Demonstrating a function call with an array and its size
-    int digits[] = {1, 2, 3, 4, 5}; // Initialize an example array
+    int digits[] = {1, 2, 3, 4, 5};                // Initialize an example array
     int size = sizeof(digits) / sizeof(digits[0]); // Calculate array size
 
     fun(digits, size); // Call the function with both array and size
@@ -52,7 +55,7 @@ int main() {
 
     // Double pointer (pointer to pointer) example
     int temp = 42;
-    arr[2] = &temp; // Initialize the third element of arr
+    arr[2] = &temp;       // Initialize the third element of arr
     int **ptr2 = arr + 2; // ptr2 points to the address of the third pointer in arr
 
     int value = **ptr2; // Get the value pointed to by arr[2]
