@@ -68,6 +68,9 @@ https://www.youtube.com/watch?v=ZjMzBd1Dqz8&ab_channel=TheRadLectures
 
 https://www.youtube.com/watch?v=nzRnWUjGJl8&t=675s&ab_channel=CppCon
 
+-------------------
+
+
 
 You're right to focus on projects that will make your portfolio stand out, especially when applying to top tech companies like Uber, Google, Amazon, and Indeed. The projects I suggested are indeed geared towards software engineering roles, but let's refine the list to ensure it's even more targeted and impressive for these specific companies.
 
