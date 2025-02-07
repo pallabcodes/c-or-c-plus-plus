@@ -142,3 +142,7 @@ To make your portfolio truly stand out:
 4. Add monitoring and observability features.
 5. Consider open-sourcing your projects and getting community feedback.
 6. Write blog posts or create videos explaining the challenges you faced and how you solved them.
+
+
+--
+
