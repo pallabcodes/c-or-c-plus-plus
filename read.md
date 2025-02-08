@@ -144,5 +144,14 @@ To make your portfolio truly stand out:
 6. Write blog posts or create videos explaining the challenges you faced and how you solved them.
 
 
---
+------------------------------
+
+https://chatgpt.com/c/67a3208c-4a64-800f-b029-61e455f996c4
+https://tutflix.org/threads/aaron-francis-high-performance-sqlite.60592/
+https://tutflix.org/threads/donny-wals-practical-swift-concurrency-the-video-course.60270/
+https://tutflix.org/threads/practical-accessibility-practical-accessibility-for-web-designers-and-developers.60349/
+https://tutflix.org/threads/kubernetes-hands-on-deploy-microservices-to-the-aws-cloud.41599/
+https://tutflix.org/threads/the-complete-guide-to-grpc-protobuf-java-spring-boot.7781/
+https://tutflix.org/threads/spring-cloud-fundamentals.5275/
+https://tutflix.org/threads/a-fullstack-saga-springboot-angular-kubernetes.1885/
 
