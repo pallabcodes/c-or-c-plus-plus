@@ -15,7 +15,7 @@ int searchRotatedArray(vector<int> &nums, int target) {
 
     // Determine which half is sorted
     if (nums[left] <= nums[mid]) { // Left half is sorted
-      if (nums[left] <= target && target < nums[mid])
+      if (nums[left] <= target && target < nums[mid]) 
         right = mid - 1; // Search in left half
       else
         left = mid + 1; // Search in right half
