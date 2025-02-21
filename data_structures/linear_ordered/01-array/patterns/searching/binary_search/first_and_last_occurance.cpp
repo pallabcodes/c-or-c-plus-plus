@@ -44,3 +44,21 @@ int main() {
 
   return 0;
 }
+
+// https://www.youtube.com/watch?v=oZerk5iKh18
+// https://www.youtube.com/watch?v=w5LYB2u9-ho
+
+// https://www.youtube.com/watch?v=aA9V-sMsmJo
+// https://www.youtube.com/watch?v=lToTMeemSmE
+
+// https://www.youtube.com/watch?v=ju-AwFMzqaU
+// https://www.youtube.com/watch?v=nXyPLFQeddA
+
+// https://www.youtube.com/watch?v=zwzrt_3JUxU
+// https://www.youtube.com/watch?v=9tDkkKDQWlg
+
+// https://www.youtube.com/watch?v=eFcdH93oFD8
+// https://www.youtube.com/watch?v=_86WEtX9GCU
+
+// https: // www.youtube.com/watch?v=QUwLguVG_uQ
+// https://www.youtube.com/watch?v=ua7Y7cgm1Cg
