@@ -23,10 +23,12 @@ int main() {
   int target = 7;
 
   int index = binarySearch(arr, target);
-  if (index != -1)
+
+  if (index != -1) {
     cout << "Element found at index: " << index << endl;
-  else
+  } else {
     cout << "Element not found." << endl;
+  }
 
   return 0;
 }
