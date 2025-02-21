@@ -8,9 +8,11 @@ vector<int> computePrefixSum(vector<int> &arr) {
   vector<int> prefix(n);
   prefix[0] = arr[0];
 
+  // creating the prefix sum
   for (int i = 1; i < n; i++) {
     prefix[i] = prefix[i - 1] + arr[i];
   }
+
   return prefix;
 }
 
@@ -20,7 +22,7 @@ int rangeSum(vector<int> &prefix, int L, int R) {
 
 int main() {
   vector<int> arr = {2, 4, 6, 8, 10};
-  vector<int> prefix = computePrefixSum(arr);
+  vector<int> prefix = computePrefixSum(arr); // Compute prefix sum
 
   cout << "Sum(1, 3): " << rangeSum(prefix, 1, 3) << endl; // Output: 18
   cout << "Sum(2, 4): " << rangeSum(prefix, 2, 4) << endl; // Output: 24
