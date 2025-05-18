@@ -1,0 +1,27 @@
+# Binaries
+mydb
+
+# Object files
+*.o
+
+# Database files
+*.db
+db/*
+!db/sample.db
+
+# Editor backups and swap files
+*~
+*.swp
+*.swo
+*.un~
+
+# macOS / Windows system files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+
+# VS Code settings
+.vscode/
+
+# Logs
+*.log

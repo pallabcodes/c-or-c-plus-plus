@@ -1,12 +1,33 @@
+# Compiler and flags
 CC = gcc
-CFLAGS = -Wall -Iinclude
-SRC = src/main.c src/file.c src/file_header.c src/parse.c
-OUT = mydb
+CFLAGS = -Wall -Wextra -Iinclude
 
-all: $(OUT)
+# Source files
+SRC = src/main.c \
+      src/file.c \
+      src/file_header.c \
+      src/employee.c \
+      src/parse.c
 
-$(OUT): $(SRC)
-	$(CC) $(CFLAGS) -o $(OUT) $(SRC)
+# Output binary
+BIN = mydb
 
+# Default target
+all: $(BIN)
+
+$(BIN): $(SRC)
+	$(CC) $(CFLAGS) $(SRC) -o $(BIN)
+
+# Clean up build artifacts
 clean:
-	rm -f $(OUT)
+	rm -f $(BIN)
+
+# Run with arguments
+run:
+	./$(BIN)
+
+# Create db directory if not exists
+init:
+	mkdir -p db
+
+.PHONY: all clean run init

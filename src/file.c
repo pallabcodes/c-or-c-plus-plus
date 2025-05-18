@@ -86,3 +86,66 @@ bool list_employees_from_file(const char *filepath) {
     fclose(fp);
     return true;
 }
+
+bool insert_employee(const char *filepath, Employee *emp) {
+    FILE *fp = fopen(filepath, "ab");
+    if (!fp) return false;
+    bool success = fwrite(emp, sizeof(Employee), 1, fp) == 1;
+    fclose(fp);
+    return success;
+}
+
+bool search_employee_by_id(const char *filepath, uint32_t id, Employee *found) {
+    FILE *fp = fopen(filepath, "rb");
+    if (!fp) return false;
+
+    fseek(fp, sizeof(DBHeader), SEEK_SET);
+    Employee emp;
+    while (fread(&emp, sizeof(Employee), 1, fp) == 1) {
+        if (emp.id == id) {
+            *found = emp;
+            fclose(fp);
+            return true;
+        }
+    }
+
+    fclose(fp);
+    return false;
+}
+
+bool delete_employee_by_id(const char *filepath, uint32_t id) {
+    FILE *fp = fopen(filepath, "rb");
+    if (!fp) return false;
+
+    FILE *tmp = fopen("temp.db", "wb");
+    if (!tmp) {
+        fclose(fp);
+        return false;
+    }
+
+    DBHeader header;
+    fread(&header, sizeof(DBHeader), 1, fp);
+    fwrite(&header, sizeof(DBHeader), 1, tmp);
+
+    Employee emp;
+    bool found = false;
+    while (fread(&emp, sizeof(Employee), 1, fp) == 1) {
+        if (emp.id == id) {
+            found = true;
+            continue;
+        }
+        fwrite(&emp, sizeof(Employee), 1, tmp);
+    }
+
+    fclose(fp);
+    fclose(tmp);
+
+    if (found) {
+        remove(filepath);
+        rename("temp.db", filepath);
+    } else {
+        remove("temp.db");
+    }
+
+    return found;
+}
