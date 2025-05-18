@@ -1,6 +1,0 @@
-Prefix Sum works well with:
-
-1. Arrays
-   - Example: Subarray Sum Equals K.
-2. Grids
-   - Example: 2D Prefix Sum (Matrix).

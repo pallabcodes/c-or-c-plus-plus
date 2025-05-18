@@ -1,6 +1,0 @@
-Two Pointers works well with:
-
-1. Arrays
-   - Example: Pair with Target Sum.
-2. Linked Lists
-   - Example: Detect Cycle in a Linked List.

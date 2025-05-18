@@ -1,7 +1,0 @@
-Binary Search Tree (BST) Algorithms work with:
-
-1. Trees
-   - Example: Validate BST, Find Kth Smallest.
-
-2. Arrays (sorted arrays converted to BSTs)
-   - Example: Sorted Array to BST.

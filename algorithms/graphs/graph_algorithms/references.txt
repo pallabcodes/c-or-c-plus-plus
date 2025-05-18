@@ -1,5 +1,0 @@
-Graph Algorithms work with:
-1. Graphs
-   - Example: BFS, DFS, Dijkstra’s Algorithm.
-2. Trees (as a special type of graph)
-   - Example: Lowest Common Ancestor, Diameter of a Tree.
