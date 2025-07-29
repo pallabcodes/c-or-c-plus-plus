@@ -61,7 +61,6 @@ public:
     // String representation for logging
     std::string to_string() const;
 
-private:
     sockaddr_in addr_{};
     explicit SocketAddress(const sockaddr_in& addr) : addr_(addr) {}
 };

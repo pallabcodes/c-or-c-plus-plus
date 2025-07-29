@@ -252,7 +252,7 @@ void RequestParser::reset() {
     error_message_.clear();
 }
 
-ParseResult RequestParser::parse(std::span<const uint8_t> data) {
+ParseResult<std::pair<Request, size_t>> RequestParser::parse(std::span<const uint8_t> data) {
     // Append new data to buffer
     buffer_.insert(buffer_.end(), data.begin(), data.end());
     
@@ -260,14 +260,14 @@ ParseResult RequestParser::parse(std::span<const uint8_t> data) {
         switch (state_) {
             case ParseState::REQUEST_LINE:
                 if (auto result = parse_request_line(); !result) {
-                    return ParseError::INCOMPLETE;
+                    return std::unexpected(ParseError::INCOMPLETE);
                 }
                 state_ = ParseState::HEADERS;
                 break;
                 
             case ParseState::HEADERS:
                 if (auto result = parse_headers(); !result) {
-                    return ParseError::INCOMPLETE;
+                    return std::unexpected(ParseError::INCOMPLETE);
                 }
                 
                 // Check if request has body
@@ -283,13 +283,13 @@ ParseResult RequestParser::parse(std::span<const uint8_t> data) {
                 
             case ParseState::BODY:
                 if (auto result = parse_body(); !result) {
-                    return ParseError::INCOMPLETE;
+                    return std::unexpected(ParseError::INCOMPLETE);
                 }
                 return finalize_request();
                 
             case ParseState::CHUNK_SIZE:
                 if (auto result = parse_chunk_size(); !result) {
-                    return ParseError::INCOMPLETE;
+                    return std::unexpected(ParseError::INCOMPLETE);
                 }
                 
                 if (chunk_size_ == 0) {
@@ -301,19 +301,19 @@ ParseResult RequestParser::parse(std::span<const uint8_t> data) {
                 
             case ParseState::CHUNK_DATA:
                 if (auto result = parse_chunk_data(); !result) {
-                    return ParseError::INCOMPLETE;
+                    return std::unexpected(ParseError::INCOMPLETE);
                 }
                 state_ = ParseState::CHUNK_SIZE;
                 break;
                 
             case ParseState::CHUNK_TRAILERS:
                 if (auto result = parse_chunk_trailers(); !result) {
-                    return ParseError::INCOMPLETE;
+                    return std::unexpected(ParseError::INCOMPLETE);
                 }
                 return finalize_request();
                 
             case ParseState::ERROR:
-                return ParseError::INVALID_FORMAT;
+                return std::unexpected(ParseError::INVALID_FORMAT);
         }
     }
 }
@@ -495,9 +495,9 @@ void RequestParser::set_error(std::string message) {
     error_message_ = std::move(message);
 }
 
-ParseResult RequestParser::finalize_request() {
+ParseResult<std::pair<Request, size_t>> RequestParser::finalize_request() {
     if (!current_request_) {
-        return ParseError::INCOMPLETE;
+        return std::unexpected(ParseError::INCOMPLETE);
     }
     
     // Calculate consumed bytes

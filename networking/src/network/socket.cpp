@@ -2,6 +2,7 @@
 #include <sstream>
 #include <cstring>
 #include <sys/time.h>
+#include <netinet/tcp.h>
 
 namespace networking {
 

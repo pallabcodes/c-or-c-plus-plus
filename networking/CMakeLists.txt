@@ -75,24 +75,43 @@ target_link_libraries(networking
     PRIVATE $<$<BOOL:${ENABLE_TLS}>:OpenSSL::SSL OpenSSL::Crypto>
 )
 
-# Examples
-add_executable(production_server examples/production_server.cpp)
-target_link_libraries(production_server networking)
+# Examples (if they exist)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/examples/production_server.cpp")
+    add_executable(production_server examples/production_server.cpp)
+    target_link_libraries(production_server networking)
+endif()
 
-add_executable(real_time_chat examples/real_time_chat.cpp)
-target_link_libraries(real_time_chat networking)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/examples/real_time_chat.cpp")
+    add_executable(real_time_chat examples/real_time_chat.cpp)
+    target_link_libraries(real_time_chat networking)
+endif()
 
-# Tests
+# HTTP Demo Examples
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/examples/http_server_demo.cpp")
+    add_executable(http_server_demo examples/http_server_demo.cpp)
+    target_link_libraries(http_server_demo networking)
+    message(STATUS "✅ HTTP Server Demo will be built")
+endif()
+
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/examples/http_client_test.cpp")
+    add_executable(http_client_test examples/http_client_test.cpp)
+    target_link_libraries(http_client_test networking)
+    message(STATUS "✅ HTTP Client Test will be built")
+endif()
+
+# Tests (if they exist)
 if(GTest_FOUND OR TARGET gtest)
     enable_testing()
     
-    add_executable(test_networking tests/test_networking.cpp)
-    target_link_libraries(test_networking 
-        networking 
-        $<IF:$<TARGET_EXISTS:gtest>,gtest gtest_main,GTest::gtest GTest::gtest_main>
-    )
-    
-    add_test(NAME networking_tests COMMAND test_networking)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/tests/test_networking.cpp")
+        add_executable(test_networking tests/test_networking.cpp)
+        target_link_libraries(test_networking 
+            networking 
+            $<IF:$<TARGET_EXISTS:gtest>,gtest gtest_main,GTest::gtest GTest::gtest_main>
+        )
+        
+        add_test(NAME networking_tests COMMAND test_networking)
+    endif()
 endif()
 
 # Benchmarks
