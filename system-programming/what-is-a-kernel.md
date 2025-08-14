@@ -1,0 +1,1 @@
+The kernel is the center of the Unix operating system that is essentially
