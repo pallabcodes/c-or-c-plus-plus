@@ -1,0 +1,3 @@
+Usually you have processes and threads executing concurrently or in parrallel -> when doing this, sometimes it causes issues when you are using shared data between them.
+
+So, when two processes sharing the same set of data, they cannot access the same data at the same time because it will cause data integrity issues in order to solve this issue -> we will be using `sempahore` to accomplish synchronization.
