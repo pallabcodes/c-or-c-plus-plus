@@ -1,59 +1,45 @@
-
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <string.h>
 #include <errno.h>
 
-#define BUF_SIZE 4096
-
 int main() {
-    const char *src_filename = "input.txt";
-    const char *dst_filename = "output.txt";
-    int src_fd, dst_fd;
-    char buffer[BUF_SIZE];
-    ssize_t bytes_read, bytes_written;
-
-    // Open source file for reading
-    src_fd = open(src_filename, O_RDONLY);
-    if (src_fd < 0) {
-        printf("Error opening source file '%s': %s\n", src_filename, strerror(errno));
+    const char *filename = "seek-demo.txt";
+    int fd = open(filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (fd < 0) {
+        printf("Error opening file '%s': %s\n", filename, strerror(errno));
         return 1;
     }
 
-    // Open destination file for writing (create if it doesn't exist, truncate if it does)
-    dst_fd = open(dst_filename, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (dst_fd < 0) {
-        printf("Error opening destination file '%s': %s\n", dst_filename, strerror(errno));
-        close(src_fd);
+    // Write initial data
+    const char *initial_text = "Hello, this is the original content.\n";
+    ssize_t written = write(fd, initial_text, strlen(initial_text));
+    if (written < 0) {
+        printf("Error writing initial data: %s\n", strerror(errno));
+        close(fd);
         return 1;
     }
 
-    // Copy data from source to destination in chunks
-    while ((bytes_read = read(src_fd, buffer, BUF_SIZE)) > 0) {
-        ssize_t total_written = 0;
-        while (total_written < bytes_read) {
-            bytes_written = write(dst_fd, buffer + total_written, bytes_read - total_written);
-            if (bytes_written < 0) {
-                printf("Error writing to destination file '%s': %s\n", dst_filename, strerror(errno));
-                close(src_fd);
-                close(dst_fd);
-                return 1;
-            }
-            total_written += bytes_written;
-        }
-    }
-    if (bytes_read < 0) {
-        printf("Error reading from source file '%s': %s\n", src_filename, strerror(errno));
-        close(src_fd);
-        close(dst_fd);
+    // Seek to a specific position (e.g., overwrite "original" with "updated")
+    off_t seek_pos = 18; // Position after "Hello, this is the "
+    if (lseek(fd, seek_pos, SEEK_SET) == (off_t)-1) {
+        printf("Error seeking in file: %s\n", strerror(errno));
+        close(fd);
         return 1;
     }
 
-    // Close both files
-    close(src_fd);
-    close(dst_fd);
-    printf("Successfully copied '%s' to '%s'.\n", src_filename, dst_filename);
+    // Overwrite part of the file
+    const char *update_text = "updated";
+    written = write(fd, update_text, strlen(update_text));
+    if (written < 0) {
+        printf("Error writing update: %s\n", strerror(errno));
+        close(fd);
+        return 1;
+    }
+
+    close(fd);
+    printf("Successfully wrote and updated '%s' using seek.\n", filename);
     return 0;
 }
 
