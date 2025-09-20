@@ -1,0 +1,222 @@
+SNAKE GAME - MVP TASKS BREAKDOWN
+==================================
+
+PROJECT: Snake Game in C++ (MVP Version)
+PRIORITY: Core functionality only - no advanced features
+
+MODULE 1: CORE GAME MECHANICS
+==============================
+
+1.1 Game Engine Setup
+- [x] Create main Game class with game loop
+- [x] Implement basic game state management (RUNNING, PAUSED, GAME_OVER)
+- [x] Set up game board with configurable dimensions (20x20 minimum)
+- [x] Implement frame rate control (30 FPS minimum)
+- [x] Create basic input handling system
+
+1.2 Snake Entity
+- [x] Create Snake class with position and direction
+- [x] Implement snake body as vector of coordinates
+- [x] Add movement logic (UP, DOWN, LEFT, RIGHT)
+- [x] Implement direction change validation (prevent 180° turns)
+- [x] Add snake growth mechanism
+- [x] Implement snake rendering (console-based initially)
+
+1.3 Food System
+- [x] Create Food class with position
+- [x] Implement random food generation on board
+- [x] Add food collision detection with snake
+- [x] Ensure only one food exists at a time
+- [x] Implement food respawning after consumption
+- [x] Add basic food rendering
+
+1.4 Collision Detection
+- [x] Implement wall boundary collision detection
+- [x] Add snake self-collision detection
+- [x] Create collision response system (game over)
+- [x] Test collision edge cases
+
+1.5 Game Board
+- [x] Create Board class for game area management
+- [x] Implement grid-based coordinate system
+- [x] Add boundary rendering
+- [x] Create board state validation
+
+MODULE 2: POINT SYSTEM
+=======================
+
+2.1 Basic Scoring
+- [x] Implement base scoring (10 points per food)
+- [x] Create ScoreManager class
+- [x] Add current score tracking
+- [x] Implement score display on screen
+- [x] Add score persistence (save/load high score)
+
+2.2 Score Display
+- [x] Create score display interface
+- [x] Show current score prominently
+- [x] Display high score
+- [x] Add score update animations
+- [x] Implement score formatting
+
+MODULE 3: CHECKPOINT SYSTEM
+============================
+
+3.1 Checkpoint Data Structure
+- [x] Define checkpoint data structure (snake state, score, board state)
+- [x] Create CheckpointManager class
+- [x] Implement checkpoint creation logic (every 100 points)
+- [x] Add checkpoint storage (maximum 5 checkpoints)
+
+3.2 Checkpoint Persistence
+- [x] Implement checkpoint serialization to file
+- [x] Add checkpoint deserialization
+- [x] Create checkpoint file format
+- [x] Add error handling for file operations
+
+3.3 Checkpoint Restoration
+- [x] Implement restart from checkpoint functionality
+- [x] Add checkpoint selection interface
+- [x] Create checkpoint validation
+- [x] Test checkpoint data integrity
+
+MODULE 4: USER INTERFACE (BASIC)
+=================================
+
+4.1 Console Interface
+- [x] Create main menu system
+- [x] Implement game start option
+- [x] Add continue from checkpoint option
+- [x] Create pause functionality
+- [x] Add game over screen
+
+4.2 Input Handling
+- [x] Implement keyboard input (arrow keys)
+- [x] Add pause key (Spacebar/ESC)
+- [x] Create menu navigation controls
+- [x] Add input buffering for smooth movement
+
+4.3 Visual Rendering
+- [x] Implement console-based game board rendering
+- [x] Add snake visualization (different characters for head/body)
+- [x] Create food representation
+- [x] Implement score display overlay
+- [x] Add basic game state indicators
+
+MODULE 5: GAME FLOW
+====================
+
+5.1 Main Game Loop
+- [x] Implement core game loop with proper timing
+- [x] Add input processing in game loop
+- [x] Implement game state updates
+- [x] Add rendering calls
+- [x] Create frame rate limiting
+
+5.2 Game States
+- [x] Implement main menu state
+- [x] Add gameplay state
+- [x] Create pause state
+- [x] Implement game over state
+- [x] Add state transition logic
+
+5.3 Game Initialization
+- [x] Create game setup and initialization
+- [x] Implement board creation
+- [x] Add snake starting position
+- [x] Create initial food placement
+- [x] Set up default game parameters
+
+MODULE 6: BUILD SYSTEM & DEPENDENCIES
+======================================
+
+6.1 CMake Configuration
+- [x] Create CMakeLists.txt for project
+- [x] Set up C++17 standard requirement
+- [x] Configure build targets
+- [x] Add compiler flags and options
+- [x] Set up cross-platform compilation
+
+6.2 Project Structure
+- [x] Organize source files into logical directories
+- [x] Create header files for all classes
+- [x] Implement proper include guards
+- [x] Add forward declarations where appropriate
+- [x] Create main.cpp entry point
+
+6.3 Dependencies
+- [x] Use only standard C++ libraries
+- [x] Ensure no external graphics libraries required
+- [x] Test compilation on Linux
+- [x] Verify minimal dependency footprint
+
+MODULE 7: TESTING & DEBUGGING
+==============================
+
+7.1 Basic Testing
+- [x] Test snake movement in all directions
+- [x] Verify food generation and consumption
+- [x] Test collision detection accuracy
+- [x] Validate score calculation
+- [x] Test checkpoint creation and restoration
+
+7.2 Error Handling
+- [x] Add input validation
+- [x] Implement file operation error handling
+- [x] Add game state validation
+- [x] Create graceful error recovery
+- [x] Add debug logging (optional)
+
+7.3 Performance Testing
+- [x] Verify 30+ FPS performance
+- [x] Test memory usage stability
+- [x] Validate input responsiveness
+- [x] Test with different board sizes
+
+IMPLEMENTATION PRIORITY ORDER
+=============================
+
+PHASE 1 (Week 1-2): Core Gameplay
+- Module 1: Core Game Mechanics
+- Module 6: Build System & Dependencies
+
+PHASE 2 (Week 3): Scoring & Checkpoints
+- Module 2: Point System
+- Module 3: Checkpoint System
+
+PHASE 3 (Week 4): Interface & Polish
+- Module 4: User Interface (Basic)
+- Module 5: Game Flow
+- Module 7: Testing & Debugging
+
+MVP FEATURES EXCLUDED
+=====================
+- Advanced graphics (SDL2 integration)
+- Combo multipliers and bonus points
+- Multiple difficulty levels
+- Power-ups and special abilities
+- Multiplayer support
+- Advanced animations and effects
+- Customizable snake appearances
+- Level progression system
+- Touch/mouse controls
+- Advanced menu systems
+
+DELIVERABLES
+============
+- Working snake game with basic console interface
+- Functional point system with high score tracking
+- Working checkpoint system with save/load
+- Cross-platform C++ source code
+- CMake build configuration
+- Basic testing and validation
+- Simple user manual
+
+ESTIMATED EFFORT
+================
+Total: 4 weeks
+- Phase 1: 2 weeks
+- Phase 2: 1 week  
+- Phase 3: 1 week
+
+This MVP focuses on delivering the core snake gameplay experience with the three main requirements: basic snake game, point system, and checkpoint functionality, while keeping the scope manageable and achievable within the timeframe.

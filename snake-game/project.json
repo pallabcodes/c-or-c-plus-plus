@@ -1,0 +1,58 @@
+{
+  "name": "Snake Game",
+  "version": "1.0.0",
+  "description": "A classic Snake game implementation in C++ with SDL2 graphics",
+  "language": "C++",
+  "standard": "C++17",
+  "author": "Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/snake-game.git"
+  },
+  "dependencies": {
+    "SDL2": ">=2.0.0",
+    "SDL2_ttf": ">=2.0.0"
+  },
+  "build_systems": [
+    "CMake",
+    "Makefile"
+  ],
+  "target_platforms": [
+    "Linux",
+    "Windows",
+    "macOS"
+  ],
+  "features": [
+    "Classic Snake Gameplay",
+    "SDL2 Graphics",
+    "Point System",
+    "Checkpoint System",
+    "High Score Persistence",
+    "Cross-platform Support"
+  ],
+  "game_config": {
+    "default_board_width": 20,
+    "default_board_height": 20,
+    "default_fps": 30,
+    "min_fps": 15,
+    "max_fps": 60,
+    "points_per_food": 10,
+    "checkpoint_interval": 100,
+    "max_checkpoints": 5
+  },
+  "controls": {
+    "movement": ["Arrow Keys", "WASD"],
+    "pause": ["Spacebar", "ESC"],
+    "start": "Spacebar",
+    "exit": "ESC"
+  },
+  "file_structure": {
+    "src": "Source code files",
+    "include": "Header files",
+    "docs": "Documentation",
+    "scripts": "Build and utility scripts",
+    "assets": "Game assets",
+    "build": "Build output directory"
+  }
+}
