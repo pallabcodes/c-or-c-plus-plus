@@ -68,6 +68,8 @@ This section contains real-world examples and case studies from top-tier compani
 
 - **25_apple_arkit.swift** - Apple's ARKit implementation and patterns
 - **26_meta_vr.swift** - Meta's VR implementation and cross-platform development
+- **27_google_arcore.swift** - Google's ARCore implementation and cross-platform AR
+- **28_microsoft_hololens.swift** - Microsoft's HoloLens mixed reality implementation
 
 ## Animation Examples
 

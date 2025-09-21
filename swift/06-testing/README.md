@@ -38,6 +38,12 @@ This section covers comprehensive testing strategies and techniques used in prod
 - **Contract Testing**: API contract validation
 - **Load Testing**: Performance and stress testing
 
+### 6. AR/VR Testing
+- **AR Testing**: ARKit and ARCore testing strategies
+- **VR Testing**: Meta VR and cross-platform VR testing
+- **Performance Testing**: AR/VR performance monitoring and optimization
+- **Integration Testing**: AR/VR data synchronization and state management
+
 ## Code Quality Standards
 
 Every implementation in this section follows:
