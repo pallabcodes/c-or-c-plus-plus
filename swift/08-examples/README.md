@@ -76,15 +76,19 @@ This section contains real-world examples and case studies from top-tier compani
 - **29_advanced_mathematical_animations.swift** - Advanced mathematical animations with geometry and trigonometry
 - **30_physics_based_animations.swift** - Physics-based animations with particle systems and fluid dynamics
 - **31_geometric_animations.swift** - Geometric animations with 3D transformations and fractals
+- **32_advanced_mathematical_enhancements.swift** - Critical missing mathematical concepts (quaternions, splines, easing)
+- **33_animation_performance_optimization.swift** - SIMD, memory, and GPU optimization for animations
 - **32_apple_performance_optimization.swift** - Apple's performance optimization techniques
 - **33_hardware_optimization.swift** - Hardware-specific optimizations and utilization
 - **34_performance_monitoring.swift** - Performance monitoring and profiling systems
+- **35_advanced_performance_optimization.swift** - Advanced performance optimization with SIMD, vectorization, and compiler optimizations
 
 ## Performance Examples
 
 - **32_apple_performance_optimization.swift** - Apple's performance optimization techniques
 - **33_hardware_optimization.swift** - Hardware-specific optimizations and utilization
 - **34_performance_monitoring.swift** - Performance monitoring and profiling systems
+- **35_advanced_performance_optimization.swift** - Advanced performance optimization with SIMD, vectorization, and compiler optimizations
 
 ## Key Learning Objectives
 
