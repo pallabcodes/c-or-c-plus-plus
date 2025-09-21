@@ -81,7 +81,7 @@ Real-world examples and case studies
 - **Meta Examples**: VR implementation and cross-platform development
 - **AR/VR Examples**: Apple ARKit and Meta VR patterns
 - **Animation Examples**: Apple animations, Google Material Design, advanced mathematical, physics-based, and geometric animations
-- **Performance Examples**: Apple performance optimization, hardware optimization, and performance monitoring
+- **Performance Examples**: Apple performance optimization, hardware optimization, performance monitoring, and advanced performance optimization
 
 ### 09-references/
 Comprehensive references and documentation
