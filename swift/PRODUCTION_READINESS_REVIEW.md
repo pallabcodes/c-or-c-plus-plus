@@ -52,9 +52,14 @@ This document provides a comprehensive review of the Swift learning repository t
 
 #### 8. Real-World Examples (08-examples/)
 - **Status**: ✅ Complete
-- **Files**: 4 files (README + 3 company examples)
-- **Coverage**: Apple, Spotify, Twitch, Google, Stripe examples
-- **Quality**: Production-grade company-specific implementations
+- **Files**: 20+ (README + company and systems examples)
+- **Coverage**: Apple, Spotify, Twitch, Google, Stripe examples; AR/VR; animations; performance; plus:
+  - 3D Graphics: `36_3d_graphics_rendering.swift` (Metal, lighting, materials, scene management)
+  - Hardware Connectivity: `37_hardware_connectivity.swift` (CoreBluetooth, ExternalAccessory, network)
+  - Battery Optimization: `38_advanced_battery_optimization.swift` (power budgeting, thermal, throttling)
+  - Cloud/Edge Integration: `39_cloud_edge_integration.swift` (offline-first, conflict resolution, reachability/backoff)
+  - IoT/Sensors: `40_iot_sensor_integration.swift` (CoreMotion sampling, BLE ingestion, energy-aware sampling)
+- **Quality**: Production-grade company-specific and systems implementations
 
 #### 9. References (09-references/)
 - **Status**: ✅ Complete
@@ -76,7 +81,8 @@ This document provides a comprehensive review of the Swift learning repository t
 - ✅ CPU optimization and threading
 - ✅ UI performance and smooth scrolling
 - ✅ Network optimization and caching
-- ✅ Battery life optimization
+- ✅ Battery life optimization (render throttling, radios/location policies)
+- ✅ Metal 3D rendering performance best practices
 
 ### 🧪 **Testing Standards**
 - ✅ Unit testing with 90%+ coverage
@@ -85,7 +91,7 @@ This document provides a comprehensive review of the Swift learning repository t
 - ✅ Performance testing and benchmarking
 - ✅ Test-driven development practices
 
-### 📊 **Monitoring & Observability**
+### 📈 **Monitoring & Observability**
 - ✅ Comprehensive logging and analytics
 - ✅ Error tracking and crash reporting
 - ✅ Performance monitoring and metrics
@@ -132,7 +138,7 @@ This document provides a comprehensive review of the Swift learning repository t
 ### 🔍 **Google Standards**
 - ✅ Search algorithms and ML integration
 - ✅ Maps and location services
-- ✅ Machine learning with ML Kit
+- ✅ Machine learning with ML Kit (optional)
 - ✅ Cross-platform compatibility
 - ✅ Advanced analytics and insights
 
@@ -142,6 +148,14 @@ This document provides a comprehensive review of the Swift learning repository t
 - ✅ Webhook handling and processing
 - ✅ Subscription management
 - ✅ Financial data protection
+
+## Systems & Low-Level Enhancements (New)
+
+- **3D Graphics (Metal)**: Physically based material properties, depth testing, per-object uniforms, frustum scaffolding, scene LOD/culling hooks.
+- **Hardware Connectivity**: BLE discovery/characteristics, External Accessory streams, Bonjour network device discovery; unified data manager.
+- **Battery Optimization**: Power budget computation (battery/LPM/thermal/reachability), radio/location/rendering/background policies with throttling.
+- **Cloud/Edge**: Offline-first queue, batch upload/download, conflict resolution, reachability-aware scheduling, power-aware backoff.
+- **IoT/Sensors**: CoreMotion sampling and batching, BLE discovery, energy-aware sampling policies.
 
 ## Code Quality Metrics
 
@@ -154,7 +168,7 @@ This document provides a comprehensive review of the Swift learning repository t
 - **Security**: Enterprise-grade security practices
 - **Maintainability**: Clean, readable, and maintainable code
 
-### 🎯 **Standards Compliance**
+### 🏅 **Standards Compliance**
 - ✅ Swift API Design Guidelines
 - ✅ Apple Human Interface Guidelines
 - ✅ OWASP Security Guidelines
@@ -175,6 +189,7 @@ This document provides a comprehensive review of the Swift learning repository t
 - [x] Monitoring and observability
 - [x] CI/CD pipelines
 - [x] Deployment strategies
+- [x] Systems modules (3D, hardware, battery, cloud/edge, IoT)
 
 ### ✅ **Quality Assurance**
 - [x] Code review standards
@@ -234,7 +249,7 @@ The Swift learning repository is **PRODUCTION READY** and meets the standards ex
 
 - **Comprehensive Coverage**: All aspects of Swift development from fundamentals to advanced topics
 - **Production Quality**: Enterprise-grade code with proper error handling, security, and performance
-- **Real-World Examples**: Company-specific implementations from Apple, Spotify, Twitch, Google, and Stripe
+- **Real-World Examples**: Company-specific implementations plus systems modules (3D, hardware, battery, cloud/edge, IoT)
 - **Best Practices**: Industry-standard patterns and practices used by top companies
 - **Complete Documentation**: Comprehensive documentation and references
 

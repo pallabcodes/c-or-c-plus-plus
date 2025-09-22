@@ -82,6 +82,7 @@ Real-world examples and case studies
 - **AR/VR Examples**: Apple ARKit and Meta VR patterns
 - **Animation Examples**: Apple animations, Google Material Design, advanced mathematical, physics-based, and geometric animations
 - **Performance Examples**: Apple performance optimization, hardware optimization, performance monitoring, and advanced performance optimization
+- **3D & Systems Examples**: Metal 3D rendering, hardware connectivity (BLE/EA/Network), advanced battery optimization, cloud/edge offline sync, IoT sensors (CoreMotion/BLE)
 
 ### 09-references/
 Comprehensive references and documentation

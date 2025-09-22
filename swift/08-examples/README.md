@@ -15,6 +15,7 @@ This section contains real-world examples and case studies from top-tier compani
 9. [AR/VR Examples](#ar-vr-examples)
 10. [Animation Examples](#animation-examples)
 11. [Performance Examples](#performance-examples)
+12. [3D and Systems Examples](#3d-and-systems-examples)
 
 ## Apple-Style Examples
 
@@ -91,6 +92,14 @@ This section contains real-world examples and case studies from top-tier compani
 - **33_hardware_optimization.swift** - Hardware-specific optimizations and utilization
 - **34_performance_monitoring.swift** - Performance monitoring and profiling systems
 - **35_advanced_performance_optimization.swift** - Advanced performance optimization with SIMD, vectorization, and compiler optimizations
+
+## 3D and Systems Examples
+
+- **36_3d_graphics_rendering.swift** - Metal-based 3D rendering, lighting, materials, scene management
+- **37_hardware_connectivity.swift** - Core Bluetooth, External Accessory, network device connectivity
+- **38_advanced_battery_optimization.swift** - Battery/thermal monitoring, power budgeting, throttling
+- **39_cloud_edge_integration.swift** - Offline-first sync, conflict resolution, reachability/backoff
+- **40_iot_sensor_integration.swift** - CoreMotion sampling, BLE sensor ingestion, energy-aware sampling
 
 ## Key Learning Objectives
 
