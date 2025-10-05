@@ -1,0 +1,82 @@
+name: struct-learning-ci
+
+on:
+  push:
+    paths:
+      - 'struct-learning/**'
+  pull_request:
+    paths:
+      - 'struct-learning/**'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        compiler: [gcc, clang]
+        march: ['', '-march=native']
+        sanitizer: ['','-fsanitize=address -fno-omit-frame-pointer']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install toolchain (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y build-essential clang make cppcheck clang-tidy
+
+      - name: Install toolchain (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew update
+          brew install llvm make cppcheck clang-format || true
+
+      - name: Set compiler
+        run: |
+          if [ "${{ matrix.compiler }}" = "gcc" ]; then echo "CXX=g++" >> $GITHUB_ENV; fi
+          if [ "${{ matrix.compiler }}" = "clang" ]; then echo "CXX=clang++" >> $GITHUB_ENV; fi
+
+      - name: Build all
+        working-directory: struct-learning
+        env:
+          SAN: ${{ matrix.sanitizer }}
+          MARCH: ${{ matrix.march }}
+        run: |
+          make -s all
+
+      - name: Build per-module targets
+        working-directory: struct-learning
+        env:
+          SAN: ${{ matrix.sanitizer }}
+          MARCH: ${{ matrix.march }}
+        run: |
+          make -s fundamentals
+          make -s advanced
+          make -s enterprise
+          make -s performance
+          make -s system
+          make -s godmodded
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install tools
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y clang-tidy cppcheck
+
+      - name: clang-tidy (sample)
+        working-directory: struct-learning
+        run: |
+          clang-tidy 01-fundamentals/01-basic-structs.cpp -- -std=c++17 || true
+
+      - name: cppcheck (whole tree)
+        working-directory: struct-learning
+        run: |
+          cppcheck --enable=warning,performance,portability --std=c++17 --inline-suppr --quiet . || true
