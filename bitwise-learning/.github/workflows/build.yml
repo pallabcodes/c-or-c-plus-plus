@@ -1,0 +1,53 @@
+name: bitwise-learning-ci
+
+on:
+  push:
+    paths:
+      - 'bitwise-learning/**'
+  pull_request:
+    paths:
+      - 'bitwise-learning/**'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        compiler: [gcc, clang]
+        march: ['', '-march=native']
+        sanitizer: ['','-fsanitize=address -fno-omit-frame-pointer']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install toolchain (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y build-essential clang make cppcheck clang-tidy
+
+      - name: Install toolchain (macOS)
+        if: matrix.os == 'macos-latest'
+        run: |
+          brew update
+          brew install llvm make cppcheck || true
+
+      - name: Set compiler
+        run: |
+          if [ "${{ matrix.compiler }}" = "gcc" ]; then echo "CXX=g++" >> $GITHUB_ENV; fi
+          if [ "${{ matrix.compiler }}" = "clang" ]; then echo "CXX=clang++" >> $GITHUB_ENV; fi
+
+      - name: Build
+        working-directory: bitwise-learning
+        env:
+          SAN: ${{ matrix.sanitizer }}
+          MARCH: ${{ matrix.march }}
+        run: |
+          make -s all
+          make -s fundamentals
+          make -s advanced
+          make -s enterprise
+          make -s performance
+          make -s system
+          make -s godmodded
