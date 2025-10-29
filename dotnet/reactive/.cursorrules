@@ -1,0 +1,23 @@
+Reactive programming standards
+
+Scope
+* Applies to reactive programming examples and modules
+* Extends dotnet rules
+
+Observables and subscriptions
+* Dispose every subscription deterministically
+* Prefer Observable dot Create only when necessary and ensure correct OnNext OnError OnCompleted contracts
+* Use Publish and RefCount for hot sharing when appropriate
+
+Backpressure and flow control
+* Use Buffer Window Sample Throttle or Debounce to control flow
+* Use rate limiting or bounded buffers when bridging to imperative consumers
+
+Error handling
+* Use Retry Catch and Timeout appropriately
+* Do not swallow errors without routing to logging or fallback
+
+Scheduling
+* Be explicit about schedulers when crossing threads
+* Avoid unnecessary context switches
+
