@@ -1,0 +1,128 @@
+# Transaction Management Standards
+
+## Scope
+Applies to all transaction management code including ACID guarantees, isolation levels, and concurrency control. Extends repository root rules.
+
+## ACID Guarantees
+
+### Atomicity
+* All or nothing execution of transactions
+* Proper rollback on failure
+* Transaction logs for undo operations
+* Handle partial failures gracefully
+
+### Consistency
+* Enforce database constraints
+* Referential integrity maintenance
+* Check constraints and triggers
+* Transaction invariant preservation
+
+### Isolation
+* Support multiple isolation levels
+* Snapshot isolation default for most workloads
+* Serializable snapshot isolation (SSI) for strict serializability
+* Reference: "Serializable Snapshot Isolation" (Cahill et al., 2008)
+
+### Durability
+* Commit durability guarantees
+* fsync strategies for different durability requirements
+* Group commit for throughput
+* Reference: "The 5 Minute Rule" (Gray, 1987)
+
+## Multi Version Concurrency Control (MVCC)
+
+### Version Management
+* Multiple versions per tuple
+* Version chain traversal
+* Garbage collection of old versions
+* Visibility computation based on transaction snapshots
+
+### Snapshot Isolation
+* Consistent snapshot per transaction
+* Read committed variant
+* Repeatable read variant
+* Reference: "An Empirical Evaluation of In-Memory Multi-Version Concurrency Control" (Wu et al., 2017)
+
+### Timestamp Management
+* Transaction ID allocation
+* Commit timestamp assignment
+* Snapshot timestamp selection
+* Watermark tracking for garbage collection
+
+## Isolation Levels
+
+### Read Uncommitted
+* No isolation guarantees
+* Dirty reads allowed
+* Minimal locking
+
+### Read Committed
+* No dirty reads
+* Non repeatable reads possible
+* Minimal isolation overhead
+
+### Repeatable Read
+* Consistent reads within transaction
+* Phantom reads possible
+* Row level locking
+
+### Serializable
+* Full serializability
+* Serializable snapshot isolation (SSI) preferred
+* Conflict detection and resolution
+* Reference: "Serializable Snapshot Isolation" (Cahill et al., 2008)
+
+## Concurrency Control Protocols
+
+### Two Phase Locking (2PL)
+* Lock acquisition phase
+* Lock release at commit
+* Deadlock detection and resolution
+* Reference: "Granularity of Locks and Degrees of Consistency" (Gray et al., 1976)
+
+### Optimistic Concurrency Control (OCC)
+* Validation phase before commit
+* Conflict detection
+* Rollback on conflict
+* Reference: "Efficient Optimistic Concurrency Control" (Kung & Robinson, 1981)
+
+### Timestamp Ordering (TO)
+* Timestamp based ordering
+* Read and write timestamp maintenance
+* Abort and restart on timestamp violation
+
+## Lock Management
+
+### Lock Granularity
+* Table level locks (coarse grained)
+* Page level locks
+* Row level locks (fine grained)
+* Predicate locks for phantom prevention
+
+ الإنواع* Lock Types
+* Shared locks for reads
+* Exclusive locks for writes
+* Intention locks for hierarchical locking
+* Ratchet locks for upgrade paths
+
+### Deadlock Handling
+* Timeout based detection
+* Cycle detection in wait for graph
+* Victim selection strategies
+* Deadlock avoidance where possible
+
+## Implementation Requirements
+* Transaction state machine implementation
+* Proper lock ordering to prevent deadlocks
+* Efficient lock table data structures
+* Minimize lock contention
+* Optimize for read heavy workloads
+* Handle long running transactions
+
+## Performance Considerations
+* Lock free data structures where possible
+* Lock escalation and de escalation
+* Adaptive locking strategies
+* Reduce transaction duration
+* Batch operations within transactions
+

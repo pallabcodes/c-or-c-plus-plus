@@ -1,0 +1,25 @@
+Design patterns standards
+
+Scope
+* Applies to design patterns examples and modules
+* Extends dotnet rules
+
+Principles
+* Follow SOLID principles
+* Favor composition over inheritance except where patterns require otherwise
+* Keep responsibilities single and well named
+
+Pattern implementation
+* Implement patterns faithfully with clear intent
+* Provide minimal yet sufficient examples that compile
+* Avoid global mutable state
+* Ensure thread safety where patterns are used in concurrent contexts
+
+Documentation
+* Document the intent context and consequences of each pattern
+* Include usage guidance and tradeoffs
+
+Testing
+* Provide small usage examples that can be executed
+* Validate expected behavior and edge conditions
+

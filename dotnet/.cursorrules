@@ -1,0 +1,48 @@
+Dotnet standards and conventions
+
+Scope
+* Applies to all C sharp and F sharp code in dotnet directory
+* Extends repository root rules
+
+Language and runtime
+* Target modern dotnet runtime as defined by project files
+* Use nullable reference types and respect warnings
+* Use UTF eight encoding without byte order mark and use LF line endings
+
+Naming and structure
+* Use PascalCase for public types and members
+* Use camelCase for locals and parameters
+* Keep files focused and cohesive with single primary type per file when reasonable
+
+Async and concurrency
+* Use async await for I O bound work
+* Use Task dot Run only for CPU bound work
+* Always pass CancellationToken through async call chains
+* Use ConfigureAwait false in library code that is not application entry
+* Avoid blocking waits and avoid deadlocks by staying async all the way
+
+Exceptions and errors
+* Throw the most specific exception type
+* Do not swallow exceptions without actionable handling
+* Wrap external boundary failures with context preserving inner exceptions
+
+Resource management
+* Implement IDisposable when owning unmanaged or scarce resources
+* Prefer await using for IAsyncDisposable where supported
+* Ensure deterministic disposal paths
+
+Collections and threading
+* Prefer immutable collections for shared data
+* Use concurrent collections for shared mutable data
+* Avoid locks where higher level primitives exist
+
+Logging and metrics
+* Use structured logging with context
+* Avoid logging sensitive data
+* Emit metrics for critical paths when relevant
+
+Reviews and quality
+* Expect line by line review from senior engineers
+* Document non obvious design choices in code comments near usage
+* Keep public surface documented with XML documentation comments
+

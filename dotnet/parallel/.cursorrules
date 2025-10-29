@@ -1,0 +1,22 @@
+Parallel and concurrency standards
+
+Scope
+* Applies to parallel programming examples and modules
+* Extends dotnet rules
+
+Concurrency safety
+* All long running or cancellable operations accept CancellationToken
+* Use bounded queues or backpressure for producer consumer pipelines
+* Prefer concurrent collections over manual locks
+* Avoid blocking waits on async code
+
+Performance and throughput
+* Measure throughput and latency where relevant
+* Avoid excessive allocations in tight loops
+* Prefer data locality and cache friendly structures
+
+Reliability
+* Handle OperationCanceledException explicitly
+* Use retry and circuit breaker patterns where external dependencies exist
+* Ensure graceful shutdown that drains queues where applicable
+
