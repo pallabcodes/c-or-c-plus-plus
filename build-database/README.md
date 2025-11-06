@@ -796,6 +796,21 @@ Complete alphabetical reference of all database topics. Each includes technical 
 
 ---
 
+## 🧭 Linux Integration Map (aligns with `linux/` repo study)
+
+Map core database subsystems to Linux kernel capabilities for performance and observability.
+
+- I/O path: `io_uring`, direct I/O (`O_DIRECT`), `mmap` for read heavy, `fadvise`/`readahead` hints
+- Memory: huge pages, NUMA awareness (bind memory and threads), page cache behavior
+- Scheduling: thread affinity, `cgroups` cpu and io limits for multi tenant fairness
+- Observability: `perf`, `ftrace`, `eBPF` uprobes for hot operators, `blktrace` for I/O
+- Filesystems: ext4 and XFS mount and formatting options for database workloads, `noatime`
+- Networking: for wire protocol modules, `SO_REUSEPORT` accept sharding, `TCP_NODELAY`
+
+Use this map when profiling and tuning each milestone in the learning path.
+
+---
+
 ## 🎯 Production Standards
 
 All implementations must meet:

@@ -586,3 +586,21 @@ See `.cursor/rules/` (when added) or module standards for detailed guidance.
 - Production standards aligned with top tier expectations
 
 Status: 100 percent complete and client ready.
+
+## DSA foundations
+* Radix trie for topic routing and wildcard matching
+* Hash maps for sessions, subscriptions, and inflight
+* Timer wheels or priority queues for keepalive and retries
+* Ring buffers and MPSC queues for IO handoff when justified
+
+## Improvement checklist
+* Move from naive maps to radix trie with compaction and shared sub fairness
+* Persist inflight and retained with batching and compaction
+* Enforce backpressure with watermarks and slow consumer policies
+* Switch to scatter gather writes and buffer slices to reduce copies
+* Add deterministic tests for QoS transitions and timers
+
+## How to use research papers
+* ARIES: apply checkpoints plus append only log for broker state; define redo only paths and bounded recovery times
+* Raft: use per shard for session replication; document leader transfer and log compaction policies
+* LSM trees: evaluate for retained and session stores; quantify write amplification and read amplification trade offs
