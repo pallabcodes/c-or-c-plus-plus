@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.15)
+project(build_event_loop C CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+add_subdirectory(minimals/epoll_basics)
+add_subdirectory(minimals/kqueue_basics)
+add_subdirectory(minimals/timer_min_heap)
+add_subdirectory(minimals/timer_wheel)
+add_subdirectory(minimals/spsc_queue)
+add_subdirectory(minimals/reactor_single_core)
+add_subdirectory(minimals/edge_level_poller)
+add_subdirectory(minimals/backpressure_watermarks)
+add_subdirectory(minimals/writev_scatter_gather)
+add_subdirectory(minimals/reuseport_accept_shard)
+add_subdirectory(minimals/fairness_scheduler)
+add_subdirectory(minimals/slow_consumer_policy)

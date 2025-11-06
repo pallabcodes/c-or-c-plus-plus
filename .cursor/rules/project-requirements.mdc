@@ -1,0 +1,14 @@
+---
+alwaysApply: true
+title: "Project Requirements"
+description: "Applies to every request in this workspace."
+requires:
+  - google-lowlevel-sde3.mdc
+  - perf-checks.mdc
+  - memory-safety.mdc
+  - build-style.mdc
+notes: |
+  These rules ensure any conversation or code generation in this workspace
+  follows low-level C/C++ SDE-3-grade engineering principles.
+---
+
