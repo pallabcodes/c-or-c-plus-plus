@@ -35,6 +35,7 @@ pub mod mvcc;
 pub mod network;
 pub mod backup;
 pub mod monitoring;
+pub mod security;
 
 // Re-export production-ready components
 pub use config::*;

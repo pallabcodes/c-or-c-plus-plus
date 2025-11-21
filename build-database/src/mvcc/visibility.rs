@@ -56,7 +56,7 @@ impl VisibilityChecker {
     /// Repeatable Read: Can see committed versions as of snapshot time
     fn is_visible_repeatable_read(tuple: &VersionedTuple, transaction: &Transaction, txn_manager: &TransactionManager) -> bool {
         if let Some(snapshot) = &transaction.snapshot {
-            return snapshot.is_tuple_visible(tuple.xmin, tuple.xmax, txn_manager);
+            return snapshot.is_tuple_visible_repeatable_read(tuple.xmin, tuple.xmax, txn_manager);
         }
 
         // Fallback to read committed if no snapshot
@@ -65,9 +65,13 @@ impl VisibilityChecker {
 
     /// Serializable: Strictest isolation, prevents all anomalies
     fn is_visible_serializable(tuple: &VersionedTuple, transaction: &Transaction, txn_manager: &TransactionManager) -> bool {
-        // For serializable, we use the same rules as repeatable read
-        // but with additional conflict detection (simplified here)
-        Self::is_visible_repeatable_read(tuple, transaction, txn_manager)
+        // For serializable, we use the same visibility rules as repeatable read
+        // but with additional conflict detection during commit
+        if let Some(snapshot) = &transaction.snapshot {
+            return snapshot.is_tuple_visible_serializable(tuple.xmin, tuple.xmax, txn_manager);
+        }
+
+        Self::is_visible_read_committed(tuple, transaction, txn_manager)
     }
 
     /// Check if a transaction can modify a tuple (for write operations)
@@ -100,10 +104,10 @@ impl VisibilityChecker {
                 // No snapshot needed - each read gets current committed state
             }
             IsolationLevel::RepeatableRead | IsolationLevel::Serializable => {
-                // Create snapshot for repeatable read
+                // Create snapshot for repeatable read/serializable
                 use crate::mvcc::snapshot::SnapshotManager;
                 let snapshot_manager = SnapshotManager::new(std::sync::Arc::new(txn_manager.clone()));
-                let snapshot = snapshot_manager.create_snapshot(transaction.id);
+                let snapshot = snapshot_manager.create_snapshot(transaction.id, transaction.isolation_level);
                 transaction.snapshot = Some(snapshot);
             }
         }

@@ -22,7 +22,13 @@ use crate::storage::btree::engine::WorkingBTreeEngine;
 use crate::transaction::{TransactionManager, Transaction};
 use crate::vector::{VectorSearchEngine, VectorIndexManager};
 use crate::monitoring::{MetricsCollector, HealthChecker};
-use crate::security::{AccessController, AuditLogger};
+use crate::security::{
+    RBACManager, EncryptionManager, AuditLogger,
+    authentication::{AuthManager, AuthConfig},
+    authorization::{AuthzManager, AuthzContext},
+    audit::AuditConfig,
+    rbac::Permission,
+};
 use crate::config::DatabaseConfig;
 use crate::catalog::TableCatalog;
 use crate::storage::table_storage::TableStorage;
@@ -54,8 +60,11 @@ pub struct AuroraDB {
     vector_engine: Arc<VectorSearchEngine>,
     vector_index_manager: Arc<VectorIndexManager>,
 
-    /// Enterprise features
-    access_controller: Arc<AccessController>,
+    /// Enterprise security suite
+    rbac_manager: Arc<RBACManager>,
+    auth_manager: Arc<AuthManager>,
+    authz_manager: Arc<AuthzManager>,
+    encryption_manager: Arc<EncryptionManager>,
     audit_logger: Arc<AuditLogger>,
     metrics_collector: Arc<MetricsCollector>,
     health_checker: Arc<HealthChecker>,
@@ -112,9 +121,42 @@ impl AuroraDB {
         let vector_engine = Arc::new(VectorSearchEngine::new(&config.vector).await?);
         let vector_index_manager = Arc::new(VectorIndexManager::new(vector_engine.clone()).await?);
 
-        // Initialize enterprise features
-        let access_controller = Arc::new(AccessController::new(&config.security).await?);
-        let audit_logger = Arc::new(AuditLogger::new(&config.audit).await?);
+        // Initialize comprehensive security suite
+        let rbac_manager = Arc::new(RBACManager::new());
+
+        let auth_config = AuthConfig {
+            jwt_secret_key: "your-super-secret-jwt-key-that-should-be-at-least-32-characters-long".to_string(),
+            jwt_expiration_hours: 24,
+            password_min_length: 8,
+            max_login_attempts: 3,
+            lockout_duration_minutes: 15,
+            enable_mfa: false,
+            session_timeout_hours: 8,
+        };
+        let auth_manager = Arc::new(AuthManager::new(auth_config, Arc::clone(&rbac_manager)));
+
+        let audit_config = AuditConfig {
+            log_file_path: format!("{}/audit.log", config.data_directory),
+            max_log_size_mb: 100,
+            retention_days: 90,
+            enable_compliance_logging: true,
+            compliance_frameworks: vec![
+                crate::security::audit::ComplianceFramework::SOX,
+                crate::security::audit::ComplianceFramework::HIPAA,
+                crate::security::audit::ComplianceFramework::GDPR,
+            ],
+            enable_real_time_alerts: true,
+            alert_thresholds: [
+                ("LoginFailure".to_string(), 5),
+                ("PermissionDenied".to_string(), 10),
+            ].iter().cloned().collect(),
+        };
+        let audit_logger = Arc::new(AuditLogger::new(audit_config));
+        audit_logger.start(); // Start background logging
+
+        let authz_manager = Arc::new(AuthzManager::new(Arc::clone(&rbac_manager), Arc::clone(&audit_logger)));
+        let encryption_manager = Arc::new(EncryptionManager::new());
+
         let metrics_collector = Arc::new(MetricsCollector::new().await?);
         let health_checker = Arc::new(HealthChecker::new().await?);
 
@@ -147,7 +189,10 @@ impl AuroraDB {
             transaction_manager,
             vector_engine,
             vector_index_manager,
-            access_controller,
+            rbac_manager,
+            auth_manager,
+            authz_manager,
+            encryption_manager,
             audit_logger,
             metrics_collector,
             health_checker,
@@ -166,22 +211,92 @@ impl AuroraDB {
         println!("✅ AuroraDB Production Database Engine initialized successfully!");
         println!("   • Storage: {} engine(s) ready", db.storage_manager.get_engine_count().await);
         println!("   • Vector: {} indices loaded", db.vector_index_manager.get_index_count().await);
-        println!("   • Security: {} access policies active", db.access_controller.get_policy_count().await);
+        println!("   • Security: {} users, {} roles active", db.rbac_manager.list_users().len(), db.rbac_manager.list_roles().len());
 
         Ok(db)
+    }
+
+    /// Determine the required permission for a SQL operation
+    fn determine_sql_permission(&self, sql: &str) -> Permission {
+        let sql_upper = sql.trim().to_uppercase();
+
+        if sql_upper.starts_with("SELECT") {
+            Permission::SelectTable("*".to_string()) // Can be refined to specific tables
+        } else if sql_upper.starts_with("INSERT") {
+            Permission::InsertTable("*".to_string())
+        } else if sql_upper.starts_with("UPDATE") {
+            Permission::UpdateTable("*".to_string())
+        } else if sql_upper.starts_with("DELETE") {
+            Permission::DeleteTable("*".to_string())
+        } else if sql_upper.starts_with("CREATE TABLE") {
+            Permission::CreateTable("*".to_string())
+        } else if sql_upper.starts_with("DROP TABLE") {
+            Permission::DropTable("*".to_string())
+        } else if sql_upper.starts_with("ALTER TABLE") {
+            Permission::AlterTable("*".to_string())
+        } else if sql_upper.starts_with("CREATE USER") {
+            Permission::CreateUser
+        } else if sql_upper.starts_with("DROP USER") {
+            Permission::DropUser
+        } else {
+            // Default to requiring super user for unknown operations
+            Permission::SuperUser
+        }
     }
 
     /// Execute a SQL query end-to-end through the complete pipeline
     pub async fn execute_query(&self, sql: &str, user_context: &UserContext) -> AuroraResult<QueryResult> {
         let start_time = std::time::Instant::now();
 
-        // 1. Access control check (simplified for now)
-        // TODO: Implement real access control
-        // self.access_controller.check_query_access(sql, user_context).await?;
+        // 1. Authentication check
+        if let Some(session_id) = &user_context.session_id {
+            let _session = self.auth_manager.validate_session(session_id)?;
+        }
 
-        // 2. Audit logging (simplified for now)
-        // TODO: Implement real audit logging
-        // self.audit_logger.log_query(sql, user_context).await?;
+        // 2. Authorization check - determine required permission based on SQL operation
+        let required_permission = self.determine_sql_permission(sql);
+        let authz_context = AuthzContext {
+            user_id: user_context.user_id.clone(),
+            session_id: user_context.session_id.clone(),
+            client_ip: user_context.client_ip.clone(),
+            user_agent: user_context.user_agent.clone(),
+            resource_attributes: HashMap::new(),
+            environment_attributes: HashMap::new(),
+        };
+
+        let authz_decision = self.authz_manager.authorize(&authz_context, &required_permission).await?;
+        match authz_decision {
+            crate::security::authorization::AuthzDecision::Allow => {
+                // Permission granted
+            }
+            crate::security::authorization::AuthzDecision::Deny(reason) => {
+                return Err(AuroraError::new(
+                    crate::core::ErrorCode::Authorization,
+                    format!("Access denied: {}", reason)
+                ));
+            }
+            crate::security::authorization::AuthzDecision::RequireMFA => {
+                return Err(AuroraError::new(
+                    crate::core::ErrorCode::Authorization,
+                    "Multi-factor authentication required".to_string()
+                ));
+            }
+            crate::security::authorization::AuthzDecision::RequireApproval(approver) => {
+                return Err(AuroraError::new(
+                    crate::core::ErrorCode::Authorization,
+                    format!("Approval required from: {}", approver)
+                ));
+            }
+        }
+
+        // 3. Audit logging
+        self.audit_logger.log_data_access(
+            &user_context.user_id,
+            "query_execution",
+            "EXECUTE",
+            1,
+            user_context.session_id.as_deref()
+        )?;
 
         // 3. Parse the SQL query using the working parser
         let parsed_query = self.query_parser.parse(sql).await
@@ -381,6 +496,9 @@ impl AuroraDB {
             // Store the row using table storage with MVCC and WAL durability
             // For now, use a simple transaction (this should be improved with proper transaction management)
             let transaction = self.table_storage.transaction_manager.begin_transaction(crate::mvcc::transaction::IsolationLevel::ReadCommitted).await?;
+            // Create snapshot for the transaction if needed
+            let mut txn_clone = (*transaction).clone();
+            crate::mvcc::visibility::VisibilityChecker::create_snapshot_for_transaction(&mut txn_clone, &self.table_storage.transaction_manager);
             self.table_storage.insert_row(&transaction, &insert_query.table, row_data).await?;
 
             // Auto-commit for now (should be improved)
@@ -414,6 +532,9 @@ impl AuroraDB {
         let transaction = self.table_storage.transaction_manager.begin_transaction(
             crate::mvcc::transaction::IsolationLevel::ReadCommitted
         ).await?;
+        // Create snapshot for the transaction if needed
+        let mut txn_clone = (*transaction).clone();
+        crate::mvcc::visibility::VisibilityChecker::create_snapshot_for_transaction(&mut txn_clone, &self.table_storage.transaction_manager);
 
         // Get all visible rows from the table
         let all_rows = self.table_storage.scan_table(&transaction, &update_query.table).await?;
@@ -485,6 +606,9 @@ impl AuroraDB {
         let transaction = self.table_storage.transaction_manager.begin_transaction(
             crate::mvcc::transaction::IsolationLevel::ReadCommitted
         ).await?;
+        // Create snapshot for the transaction if needed
+        let mut txn_clone = (*transaction).clone();
+        crate::mvcc::visibility::VisibilityChecker::create_snapshot_for_transaction(&mut txn_clone, &self.table_storage.transaction_manager);
 
         // Get all visible rows from the table
         let all_rows = self.table_storage.scan_table(&transaction, &delete_query.table).await?;
@@ -545,6 +669,9 @@ impl AuroraDB {
 
         // Create a read-only transaction for this query
         let transaction = self.table_storage.transaction_manager.begin_transaction(crate::mvcc::transaction::IsolationLevel::ReadCommitted).await?;
+        // Create snapshot for the transaction if needed
+        let mut txn_clone = (*transaction).clone();
+        crate::mvcc::visibility::VisibilityChecker::create_snapshot_for_transaction(&mut txn_clone, &self.table_storage.transaction_manager);
 
         // Get all visible rows from the table using MVCC
         let all_rows = self.table_storage.scan_table(&transaction, &select_query.from_clause.table).await?;

@@ -166,6 +166,30 @@ impl TransactionManager {
                 ));
             }
 
+            // Check for serializable conflicts before committing
+            if matches!(transaction.isolation_level, IsolationLevel::Serializable) {
+                if let Some(snapshot) = &transaction.snapshot {
+                    // Get all active snapshots for conflict detection
+                    let active_snapshots: Vec<_> = active.values()
+                        .filter_map(|txn| txn.snapshot.as_ref())
+                        .collect();
+
+                    if !snapshot.can_commit_serializable(&active_snapshots) {
+                        // Abort transaction due to serialization conflict
+                        let mut aborted_txn = (**transaction).clone();
+                        aborted_txn.state = TransactionState::Aborted;
+
+                        let aborted_arc = Arc::new(aborted_txn);
+                        *transaction = aborted_arc;
+
+                        return Err(AuroraError::new(
+                            ErrorCode::SerializationFailure,
+                            format!("Transaction {} aborted due to serialization conflict", txn_id)
+                        ));
+                    }
+                }
+            }
+
             // Update transaction state
             let mut committed_txn = (**transaction).clone();
             committed_txn.state = TransactionState::Committed;
@@ -178,7 +202,7 @@ impl TransactionManager {
             // Replace in active map
             *transaction = committed_arc;
 
-            log::info!("Committed transaction {}", txn_id);
+            log::info!("Committed transaction {} with isolation level {:?}", txn_id, transaction.isolation_level);
             Ok(())
         } else {
             Err(AuroraError::new(

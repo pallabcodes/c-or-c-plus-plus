@@ -1,16 +1,26 @@
-//! AuroraDB Enterprise Security
+//! AuroraDB Production Security Suite
 //!
-//! Comprehensive security framework including authentication, authorization,
-//! encryption, audit logging, and compliance features for production deployment.
+//! Enterprise-grade security with RBAC, encryption, and comprehensive audit logging.
+//! UNIQUENESS: Combines research-backed security approaches with production requirements.
+//!
+//! Features:
+//! - Role-Based Access Control (RBAC) with fine-grained permissions
+//! - Data encryption at rest and in transit
+//! - Comprehensive audit logging for compliance
+//! - Multi-factor authentication support
+//! - Security policy enforcement
+//! - Threat detection and anomaly monitoring
 
-pub mod authentication;
-pub mod authorization;
+pub mod rbac;
 pub mod encryption;
 pub mod audit;
-pub mod compliance;
+pub mod authentication;
+pub mod authorization;
+pub mod policy;
 
-pub use authentication::*;
-pub use authorization::*;
+pub use rbac::*;
 pub use encryption::*;
 pub use audit::*;
-pub use compliance::*;
+pub use authentication::*;
+pub use authorization::*;
+pub use policy::*;
