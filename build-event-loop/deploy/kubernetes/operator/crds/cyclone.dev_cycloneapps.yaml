@@ -1,0 +1,252 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: cycloneapps.cyclone.dev
+  labels:
+    app.kubernetes.io/name: cyclone-operator
+spec:
+  group: cyclone.dev
+  versions:
+  - name: v1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        type: object
+        properties:
+          spec:
+            type: object
+            properties:
+              version:
+                type: string
+                description: "Cyclone version to deploy"
+                default: "latest"
+              replicas:
+                type: integer
+                description: "Number of replicas"
+                minimum: 1
+                maximum: 1000
+                default: 3
+              image:
+                type: string
+                description: "Container image to deploy"
+                default: "cyclone/cyclone-web:latest"
+              targetRPS:
+                type: integer
+                description: "Target requests per second for optimization"
+                minimum: 1000
+                maximum: 10000000
+                default: 2000000
+              maxConnections:
+                type: integer
+                description: "Maximum concurrent connections"
+                minimum: 1000
+                maximum: 1000000
+                default: 100000
+              networking:
+                type: object
+                properties:
+                  enableRDMA:
+                    type: boolean
+                    description: "Enable RDMA for database queries"
+                    default: true
+                  enableDPDK:
+                    type: boolean
+                    description: "Enable DPDK for packet processing"
+                    default: true
+                  enableXDP:
+                    type: boolean
+                    description: "Enable XDP for DDoS protection"
+                    default: true
+                  zeroCopy:
+                    type: boolean
+                    description: "Enable zero-copy networking"
+                    default: true
+              resources:
+                type: object
+                properties:
+                  requests:
+                    type: object
+                    properties:
+                      cpu:
+                        type: string
+                        default: "1000m"
+                      memory:
+                        type: string
+                        default: "1Gi"
+                  limits:
+                    type: object
+                    properties:
+                      cpu:
+                        type: string
+                        default: "2000m"
+                      memory:
+                        type: string
+                        default: "2Gi"
+              tls:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                    default: false
+                  certificateSecret:
+                    type: string
+                    description: "Name of secret containing TLS certificate"
+              metrics:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                    default: true
+                  prometheus:
+                    type: boolean
+                    default: true
+                  path:
+                    type: string
+                    default: "/metrics"
+              ingress:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                    default: true
+                  className:
+                    type: string
+                    default: "nginx"
+                  hosts:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        host:
+                          type: string
+                        paths:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              path:
+                                type: string
+                                default: "/"
+                              pathType:
+                                type: string
+                                enum: ["Exact", "Prefix", "ImplementationSpecific"]
+                                default: "Prefix"
+              monitoring:
+                type: object
+                properties:
+                  serviceMonitor:
+                    type: object
+                    properties:
+                      enabled:
+                        type: boolean
+                        default: true
+                      interval:
+                        type: string
+                        default: "30s"
+                      scrapeTimeout:
+                        type: string
+                        default: "10s"
+              autoscaling:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                    default: true
+                  minReplicas:
+                    type: integer
+                    minimum: 1
+                    default: 3
+                  maxReplicas:
+                    type: integer
+                    maximum: 1000
+                    default: 50
+                  targetCPUUtilizationPercentage:
+                    type: integer
+                    minimum: 1
+                    maximum: 100
+                    default: 70
+                  targetRPS:
+                    type: integer
+                    description: "Target RPS for scaling decisions"
+                    default: 100000
+              circuitBreaker:
+                type: object
+                properties:
+                  enabled:
+                    type: boolean
+                    default: true
+                  failureThreshold:
+                    type: integer
+                    default: 10
+                  successThreshold:
+                    type: integer
+                    default: 5
+                  timeoutSeconds:
+                    type: integer
+                    default: 300
+          status:
+            type: object
+            properties:
+              phase:
+                type: string
+                enum: ["Pending", "Running", "Failed", "Scaling"]
+              replicas:
+                type: integer
+              readyReplicas:
+                type: integer
+              availableReplicas:
+                type: integer
+              conditions:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                    status:
+                      type: string
+                      enum: ["True", "False", "Unknown"]
+                    lastTransitionTime:
+                      type: string
+                      format: date-time
+                    reason:
+                      type: string
+                    message:
+                      type: string
+              performance:
+                type: object
+                properties:
+                  currentRPS:
+                    type: integer
+                  targetRPS:
+                    type: integer
+                  latencyP95:
+                    type: string
+                  cpuUtilization:
+                    type: number
+                  memoryUtilization:
+                    type: number
+                  networkThroughput:
+                    type: string
+              networking:
+                type: object
+                properties:
+                  rdmaEnabled:
+                    type: boolean
+                  dpdkEnabled:
+                    type: boolean
+                  xdpEnabled:
+                    type: boolean
+                  activeConnections:
+                    type: integer
+                  zeroCopyOperations:
+                    type: integer
+  scope: Namespaced
+  names:
+    plural: cycloneapps
+    singular: cycloneapp
+    kind: CycloneApp
+    shortNames:
+    - ca
+    - cyclone

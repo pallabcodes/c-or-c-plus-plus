@@ -1,0 +1,257 @@
+---
+alwaysApply: false
+---
+
+# Advanced Algorithm Implementations
+
+This document catalogs all the advanced, research paper based, and god modded algorithm implementations in this repository.
+
+## Sorting Algorithms
+
+### Advanced Sorting Techniques
+- **Block Sort** (`arrays_and_strings/sorting_searching/block_sort.cpp`)
+  - Cache efficient sorting based on research paper
+  - O(n log n) worst case, O(n) best case
+  - Branch prediction friendly implementation
+
+- **Smooth Sort** (`arrays_and_strings/sorting_searching/smooth_sort.cpp`)
+  - Adaptive heap sort variant by Dijkstra
+  - O(n log n) worst case, O(n) best case for nearly sorted
+  - O(1) extra space using Leonardo numbers
+
+- **Patience Sort** (`arrays_and_strings/sorting_searching/patience_sort.cpp`)
+  - Card game inspired algorithm
+  - Simultaneously sorts and finds longest increasing subsequence
+  - O(n log n) time complexity
+
+- **IntroSort** (`arrays_and_strings/sorting_searching/introsort.cpp`)
+  - Hybrid algorithm used in C++ STL
+  - Combines quicksort, heapsort, and insertion sort
+  - Guarantees O(n log n) worst case
+
+- **TimSort** (`arrays_and_strings/sorting_searching/timsort.cpp`)
+  - Production grade algorithm used in Python and Java
+  - Combines merge sort and insertion sort
+  - O(n) best case for nearly sorted arrays
+
+## Graph Algorithms
+
+### Advanced Graph Techniques
+- **Yen's K-Shortest Paths** (`graphs/graph_algorithms/yen_k_shortest_paths.cpp`)
+  - Finds K shortest paths between two nodes
+  - Based on research by Jin Y. Yen
+  - O(K * n * (m + n log n)) complexity
+
+- **Hopcroft-Karp Algorithm** (`graphs/graph_algorithms/hopcroft_karp.cpp`)
+  - Maximum bipartite matching
+  - O(sqrt(n) * m) time complexity
+  - God modded implementation with failure links
+
+- **Dinic's Algorithm** (`graphs/graph_algorithms/dinic_max_flow.cpp`)
+  - Maximum flow in networks
+  - Based on research by Yefim Dinitz
+  - O(V^2 * E) worst case, O(V * E) for unit capacity
+
+- **Suurballe's Algorithm** (`graphs/graph_algorithms/suurballe_algorithm.cpp`)
+  - Find two edge-disjoint shortest paths
+  - Used for network reliability
+  - O(m log n + k) complexity
+
+- **Heavy-Light Decomposition** (`graphs/graph_algorithms/heavy_light_decomposition.cpp`)
+  - Decompose tree into chains for efficient queries
+  - O(log^2 n) per query with segment tree
+
+## String Algorithms
+
+### Advanced String Matching
+- **Aho-Corasick Algorithm** (`arrays_and_strings/string_manipulation/aho_corasick.cpp`)
+  - Multiple pattern string matching
+  - Based on research by Aho and Corasick
+  - O(n + m + z) time complexity
+
+- **Suffix Automaton** (`arrays_and_strings/string_manipulation/suffix_automaton.cpp`)
+  - Linear time suffix automaton construction
+  - Based on research by Blumer et al. and Ukkonen
+  - O(n) construction, O(m) pattern matching
+
+- **Advanced Z-Function** (`arrays_and_strings/string_manipulation/z_function_advanced.cpp`)
+  - Extended Z-algorithm applications
+  - Pattern matching, period finding, compression
+  - O(n + m) time complexity
+
+- **Manacher's Algorithm** (`arrays_and_strings/string_manipulation/manacher_algorithm.cpp`)
+  - Linear time longest palindromic substring
+  - O(n) time and space
+
+- **KMP Algorithm** (`arrays_and_strings/string_manipulation/kmp_algorithm.cpp`)
+  - Knuth-Morris-Pratt pattern matching
+  - O(n + m) time complexity
+
+- **Rabin-Karp Algorithm** (`arrays_and_strings/string_manipulation/rabin_karp_algorithm.cpp`)
+  - Rolling hash based pattern matching
+  - Efficient for multiple pattern search
+
+## Dynamic Programming Optimizations
+
+### Advanced DP Techniques
+- **Convex Hull Trick** (`dynamic_programming/optimizations/convex_hull_trick.cpp`)
+  - Optimize DP with linear functions
+  - Also known as Li Chao Tree or CHT
+  - O(n log n) or O(n) amortized
+
+- **Divide and Conquer DP** (`dynamic_programming/optimizations/divide_conquer_dp.cpp`)
+  - Optimizes range DP problems
+  - O(n * m * log m) instead of O(n * m^2)
+  - Used for optimal BST and similar problems
+
+- **Knuth Optimization** (`dynamic_programming/optimizations/knuth_optimization.cpp`)
+  - Optimizes DP with quadrangle inequality
+  - O(n^2) instead of O(n^3)
+  - Used for matrix chain multiplication
+
+## Mathematics Algorithms
+
+### Advanced Number Theory
+- **Chinese Remainder Theorem** (`mathematics/problems/advanced/chinese_remainder_theorem.cpp`)
+  - Solves system of congruences
+  - O(n log(max(m_i))) complexity
+  - Includes Garner's algorithm variant
+
+- **Lucas' Theorem** (`mathematics/problems/advanced/lucas_theorem.cpp`)
+  - Compute binomial coefficients modulo prime
+  - Based on research by Édouard Lucas
+  - O(p^2 * log_p(n)) complexity
+
+- **Fast Walsh-Hadamard Transform** (`mathematics/problems/advanced/fast_walsh_hadamard_transform.cpp`)
+  - Convolution over XOR, AND, OR operations
+  - O(n log n) time complexity
+  - Used in competitive programming
+
+- **FFT** (`mathematics/problems/advanced/fft.cpp`)
+  - Fast Fourier Transform
+  - Cooley-Tukey algorithm
+  - O(n log n) polynomial multiplication
+
+- **NTT** (`mathematics/problems/advanced/ntt.cpp`)
+  - Number Theoretic Transform
+  - FFT over finite fields
+
+- **Miller-Rabin** (`mathematics/problems/advanced/miller_rabin.cpp`)
+  - Probabilistic primality test
+  - O(k log^3 n) complexity
+
+- **Pollard Rho** (`mathematics/problems/advanced/pollard_rho.cpp`)
+  - Integer factorization algorithm
+  - O(sqrt(p)) average case
+
+## Geometry Algorithms
+
+### Advanced Computational Geometry
+- **Rotating Calipers** (`geometry/rotating_calipers.cpp`)
+  - Finds diameter, width, minimum bounding rectangle
+  - O(n) time complexity
+  - Used for geometric optimization
+
+- **Minkowski Sum** (`geometry/minkowski_sum.cpp`)
+  - Sum of two convex polygons
+  - Used in collision detection
+  - O(n + m) complexity
+
+- **Closest Pair** (`geometry/closest_pair.cpp`)
+  - Divide and conquer approach
+  - O(n log^2 n) or O(n log n) with optimization
+
+- **Convex Hull** (`geometry/convex_hull_graham.cpp`, `geometry/convex_hull_andrew.cpp`)
+  - Graham scan and Andrew's algorithm
+  - O(n log n) complexity
+
+## Tree Algorithms
+
+### Advanced Tree Data Structures
+- **Splay Tree** (`trees/advanced/splay_tree.cpp`)
+  - Self-adjusting binary search tree
+  - Based on research by Sleator and Tarjan
+  - Amortized O(log n) operations
+
+- **Link-Cut Tree** (`trees/advanced/link_cut_tree.cpp`)
+  - Dynamic tree data structure
+  - Supports link, cut, and path queries
+  - O(log n) amortized operations
+
+- **Persistent Segment Tree** (`trees/advanced/persistent_segment_tree.cpp`)
+  - Version-controlled segment tree
+  - Supports queries on previous versions
+  - O(log n) per update/query
+
+- **Fenwick Tree** (`trees/fenwick_tree/`)
+  - Binary Indexed Tree
+  - Efficient prefix sum queries
+
+- **Segment Tree** (`trees/segement_tree/`)
+  - Range query and update operations
+  - O(log n) per operation
+
+## Bit Manipulation
+
+### Advanced Bit Tricks
+- **Hacker's Delight Tricks** (`bit_manipulation/problems/hackers_delight_tricks.cpp`)
+  - Collection from "Hacker's Delight" by Henry S. Warren
+  - Count trailing/leading zeros
+  - Reverse bits, popcount, power of 2 operations
+  - Sign extension, absolute value without branching
+
+- **SWAR Tricks** (`bit_manipulation/problems/swar_tricks.cpp`)
+  - SIMD Within A Register techniques
+  - Parallel bit operations
+  - Extremely fast for counting bits
+
+## Array and String Techniques
+
+### Advanced Query Algorithms
+- **Mo's Algorithm** (`arrays_and_strings/advanced/mos_algorithm.cpp`)
+  - Offline range queries
+  - O((n + q) * sqrt(n)) for q queries
+  - Used for range sum, distinct elements, etc.
+
+- **Persistent Segment Trees** (`trees/advanced/persistent_segment_tree.cpp`)
+  - Time-travel queries
+  - Version-controlled data structure
+
+## Research Papers and References
+
+### Key Research Papers Implemented
+1. **Yen's Algorithm** - "Finding the K Shortest Loopless Paths in a Network"
+2. **Hopcroft-Karp** - "An n^5/2 Algorithm for Maximum Matchings in Bipartite Graphs"
+3. **Dinic's Algorithm** - "Algorithm for Solution of a Problem of Maximum Flow in a Network with Power Estimation"
+4. **Aho-Corasick** - "Efficient String Matching: An Aid to Bibliographic Search"
+5. **Sleator-Tarjan** - "Self-Adjusting Binary Search Trees" (Splay Trees, Link-Cut Trees)
+6. **Manacher** - "A New Linear-Time Algorithm for Finding the Longest Palindromic Substring"
+7. **Knuth Optimization** - Various papers on DP optimization
+8. **Convex Hull Trick** - Competitive programming techniques
+
+### Open Source References
+- Google Abseil C++ library techniques
+- Competitive programming community implementations
+- Hacker's Delight book techniques
+- CLRS algorithm implementations
+- Various GitHub repositories for optimization techniques
+
+## Implementation Standards
+
+All implementations follow:
+- Production grade code quality
+- Comprehensive error handling
+- Optimal time and space complexity
+- Well documented with complexity analysis
+- Example usage included
+- Research paper citations where applicable
+
+## Usage
+
+Each implementation includes:
+- Algorithm explanation
+- Time and space complexity
+- Research paper references
+- Example usage code
+- Edge case handling
+

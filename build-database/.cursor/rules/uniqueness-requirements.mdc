@@ -1,0 +1,141 @@
+---
+alwaysApply: false
+---
+# UNIQUENESS REQUIREMENTS (CRITICAL FOR PRODUCTION EXCELLENCE)
+
+## Scope
+Applies to ALL database development decisions and implementations. This is the foundational rule that overrides and guides all other rules. Every feature, algorithm, and design decision must demonstrate UNIQUENESS or it should not be implemented.
+
+## Core UNIQUENESS Framework
+
+### Multi-Research Paper Integration Strategy
+**MANDATORY**: Every major component must combine multiple research papers for breakthrough innovation.
+
+#### Cross-Paper Synthesis Requirements:
+- **ARIES Recovery + LSM-trees + MVCC**: Create superior durability that eliminates traditional trade-offs
+- **Raft Consensus + Paxos**: Hybrid protocols for optimal consistency/latency balance
+- **HTAP + Vector Search + AI**: Unify OLTP, OLAP, and AI workloads in single system
+- **SIMD + JIT + Adaptive Compression**: Multi-layered performance optimization
+
+#### Implementation Standards:
+- Cite specific research papers in code comments for each integration point
+- Document how multiple papers are combined to create unique solutions
+- Measure and validate that the combination delivers 10x better results than single-paper approaches
+
+### Multi-Database Best-of-Breed Integration
+**MANDATORY**: Take the strongest features from competitors and fuse them into superior solutions.
+
+#### Integration Patterns:
+- **PostgreSQL's MVCC + MySQL's Replication + MongoDB's Flexibility** → Adaptive Schema System
+- **TiDB's Distribution + ClickHouse's Analytics + Redis's Performance** → Unified Data Platform
+- **Cassandra's Scale + CockroachDB's Consistency + FoundationDB's Architecture** → Global Scale Database
+
+#### Validation Requirements:
+- Document which competitor features are being integrated
+- Prove quantitative superiority over each individual approach
+- Demonstrate that the fusion creates capabilities no single database offers
+
+### Problem-Solving Innovation Requirements
+**MANDATORY**: Every feature must solve validated pain points significantly better than competitors.
+
+#### Innovation Metrics:
+- **Significantly Better**: Solve scaling problems 10x better than PostgreSQL's limitations
+- **Smart Solutions**: Address TiDB latency spikes with predictive algorithms
+- **Ingenious Design**: Eliminate ClickHouse's update limitations with novel MVCC approaches
+- **God-Mode Implementation**: Handle edge cases that break other databases
+
+#### Validation Framework:
+- Start with validated pain points from PAIN_POINTS_ANALYSIS.md
+- Implement solutions that demonstrably outperform competitors
+- Quantify improvements with benchmarks and real-world scenarios
+
+### Research-Backed Development
+**MANDATORY**: Every algorithm and architecture decision must be grounded in academic research.
+
+#### Research Integration Standards:
+- Reference specific papers (with years and authors) in code comments
+- Explain how research translates to implementation
+- Document trade-offs and why specific research approaches were chosen
+- Track how research evolves and update implementations accordingly
+
+### AI-Native HTAP Innovation
+**MANDATORY**: Design for the convergence of OLTP, OLAP, and AI workloads.
+
+#### Innovation Requirements:
+- **Adaptive Architecture**: Dynamically switch between OLTP/OLAP modes based on workload patterns
+- **Vector-Optimized Storage**: Specialized formats for embeddings with quantization
+- **AI-Powered Operations**: ML for automatic tuning, anomaly detection, predictive scaling
+- **Multi-Model Native**: Handle relational, document, graph, time-series, and vector data seamlessly
+
+## UNIQUENESS Validation Process
+
+### Pre-Implementation Checklist:
+1. **Pain Point Validation**: Does this solve a documented pain point significantly better?
+2. **Research Synthesis**: Are multiple research papers being combined for breakthrough results?
+3. **Competitor Integration**: Are best-of-breed features being fused into superior solutions?
+4. **Quantitative Superiority**: Can we measure 10x better performance than alternatives?
+5. **Edge Case Handling**: Does this gracefully handle scenarios that break other databases?
+
+### Implementation Standards:
+1. **Research Citations**: Every complex algorithm must reference source papers
+2. **Innovation Documentation**: Explain how this differs from and improves upon competitors
+3. **Performance Validation**: Benchmark against industry standards and competitors
+4. **Edge Case Testing**: Test scenarios that commonly break other databases
+
+### Code Review Requirements:
+- **UNIQUENESS Justification**: Code reviews must validate that features demonstrate UNIQUENESS
+- **Innovation Metrics**: Track how each feature advances beyond competitor capabilities
+- **Research Validation**: Verify that implementations follow research-backed approaches
+- **Pain Point Resolution**: Confirm features actually solve real problems better
+
+## UNIQUENESS vs Traditional Database Development
+
+| Traditional Approach | UNIQUENESS Approach |
+|---------------------|-------------------|
+| "Implement B+ trees" | "Fuse LSM + B+ trees with adaptive compression for 10x better performance" |
+| "Add vector search" | "Integrate vector search into HTAP architecture with AI-powered indexing" |
+| "Support transactions" | "Combine ARIES + MVCC + Raft for consistency that scales globally" |
+| "Optimize queries" | "Use JIT + SIMD + ML for query optimization that learns and adapts" |
+
+## Critical UNIQUENESS Principles
+
+### 1. No Me-Too Features
+**FORBIDDEN**: Implement features just because competitors have them. Only implement if you can make them significantly better through research integration and innovation.
+
+### 2. Research-First Development
+**MANDATORY**: Start with research papers, not requirements. Let academic breakthroughs guide what you build.
+
+### 3. Problem-Driven Innovation
+**MANDATORY**: Build solutions to real pain points, not theoretical features. Every feature must solve problems users actually experience.
+
+### 4. Quantitative Superiority
+**MANDATORY**: Prove your solutions are measurably better. Use benchmarks, real-world scenarios, and competitive analysis.
+
+### 5. Edge Case Mastery
+**MANDATORY**: Handle the scenarios that break other databases. Be the database that "just works" when others fail.
+
+## UNIQUENESS Enforcement
+
+### Rule Hierarchy:
+1. **UNIQUENESS Requirements** (this rule) - highest priority
+2. **Code Quality Standards** - must serve UNIQUENESS goals
+3. **Domain-Specific Rules** (storage, query, etc.) - must demonstrate UNIQUENESS
+4. **All Other Rules** - supportive of UNIQUENESS objectives
+
+### Rejection Criteria:
+Features that fail UNIQUENESS validation will be rejected, regardless of:
+- Engineering effort invested
+- Feature requests from users
+- Competitive pressure
+- Technical feasibility
+
+### Success Metrics:
+- **Pain Point Resolution Rate**: Percentage of major database pain points solved
+- **Research Integration Score**: Number of research papers successfully combined
+- **Competitive Advantage Index**: Quantitative superiority over competitors
+- **Edge Case Handling Score**: Ability to handle scenarios that break other databases
+
+---
+
+## Reference: PAIN_POINTS_ANALYSIS.md
+This UNIQUENESS framework is derived from extensive research documented in PAIN_POINTS_ANALYSIS.md, which validates 30+ pain points across major databases and establishes the foundation for building a genuinely differentiated database system.

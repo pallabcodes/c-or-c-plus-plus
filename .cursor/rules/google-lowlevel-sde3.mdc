@@ -1,0 +1,136 @@
+---
+alwaysApply: false
+title: "Google SDE-3 | Low-Level Systems Engineering — Full Project Guidelines"
+description: >
+  Comprehensive, prescriptive rules for low-level C/C++ system engineering:
+  - what to deliver
+  - how to deliver it
+  - mandatory evidence in PRs
+  - CI/Release/build expectations
+  - operation & on-call
+version: 1
+---
+# OVERVIEW (Purpose)
+This rulebook codifies what is expected from engineers working on low-level C/C++ systems in this repo.  
+It is intended to be BOTH prescriptive (enforceable checks) and advisory (how to reason about trade-offs). Use it in PRs, design reviews, and CI checks.
+
+---
+
+# 0. Scope & Supported Platforms
+- Supported build targets (CI matrix): `x86_64-linux`, `aarch64-linux`, `x86_64-darwin` (dev), `aarch64-linux-musl` (optional).
+- Kernel-mode code (drivers) must list supported kernel versions in `docs/KERNEL_SUPPORT.md`.
+- Platform-specific code must use `#if defined(...)` with comments describing divergence and testing matrix.
+
+---
+
+# 1. WHAT I WANT (Outcomes & Acceptance)
+Each shipped change must satisfy one (or more) of:
+- Fix an operational problem (clear customer impact), or
+- Improve performance measurably (benchmark before/after), or
+- Add safe, testable functionality with full test coverage and a plan for rollout.
+
+**Acceptance Criteria (example):**
+- p50/p95/p99 numbers for relevant requests must be included for perf-sensitive changes.
+- No sanitizer (ASAN/UBSAN/TSAN) errors in CI for modified modules.
+- Runbook updated if behavior could affect production operations.
+- Migration plan included for any on-disk/format/protocol changes.
+
+---
+
+# 2. DIRECTORY & REPO CONVENTIONS
+- `src/` — production code
+- `include/` — public headers (minimal includes)
+- `tests/unit/` — unit tests (fast, deterministic)
+- `tests/integration/` — integration tests (may use containers)
+- `bench/` — benchmark harnesses and scripts
+- `tools/` — debugging/test tools (not shipped as part of runtime)
+- `docs/` — design docs, runbooks, kernel support, release notes
+- `ci/` — CI helper scripts, Dockerfiles
+- `third_party/` — vendored third-party code (license declared)
+
+Add `MAINTAINERS.md` listing owners by directory.
+
+---
+
+# 3. LANGUAGE & TOOLCHAIN
+- Default C++ standard: **C++17**, or C++20 with explicit justification. Kernel modules: **C**.
+- Compiler flags (CI): `-O2 -g -Wall -Wextra -Werror -Wpedantic -fstack-protector-strong -D_FORTIFY_SOURCE=2`
+- Sanitizers in CI: ASAN + UBSAN for memory safety; TSAN for concurrency-sensitive modules; MSAN nightly for unsafe code only.
+- Reproducible builds: provide `ci/Dockerfile` or `nix` dev shell. Toolchain pinned via `ci/toolchain.lock`.
+
+---
+
+# 4. HEADER & API RULES
+- Public headers must compile standalone. Keep includes minimal.
+- Prefer forward declarations in headers.
+- Use `#pragma once` or include guards consistently.
+- Document APIs with:
+  - `// Thread-safety: ...`
+  - `// Ownership: ...`
+  - `// Invariants: ...`
+  - `// Failure modes: ...`
+- Stable public APIs must be versioned. Add deprecation path for breaking changes.
+
+---
+
+# 5. MEMORY & ALLOCATORS
+- Document expected memory lifecycle and peak usage for each major component.
+- Use pooled allocators/arenas for frequently-allocated short-lived objects.
+- For global caches/engine: implement memory quota & eviction policy.
+- NUMA-aware allocations for large datasets; microbench with `numactl`.
+- Use `std::byte`, `std::uint*_t` for binary layouts.
+- Sensitive memory must be zeroed before free.
+
+---
+
+# 6. CONCURRENCY & LOCKING
+- Every public type must document thread-safety semantics.
+- Avoid global coarse locks; prefer per-shard locking or lock-striping.
+- Lock ordering must be documented in headers for multi-lock operations.
+- Lock-free data-structures MUST include:
+  - Memory-order comments
+  - ABA prevention strategy
+  - Stress tests (TSAN + concurrency fuzzing)
+- Use `std::atomic` with explicit memory order, not implicit assumptions.
+
+---
+
+# 7. PERSISTENCE & DATA FORMAT
+- All durable operations must be crash-safe and idempotent where possible.
+- Format changes (on-disk or on-wire) require:
+  - Backwards compatibility plan
+  - Migration tool or forward-compatibility validation
+  - Versioned format header with checksums
+- WAL / commit protocols must be documented and tested for partial writes.
+
+---
+
+# 8. OBSERVABILITY (logs / metrics / traces)
+- Logs: structured (JSON or `key=value`), include `timestamp`, `module`, `level`, `node_id`, `trace_id`, `txn_id`.
+- Metrics: use Prometheus naming conventions (`<component>_<metric>_total|_seconds|_gauge`).
+  - Required metrics: request latency histogram, request count, error count, queue depth, memory usage, leader/role (for distributed systems).
+- Tracing: propagate `trace_id` on RPCs; instrument major state transitions.
+- Add at least one eBPF tracepoint for critical IO/latency hotspots (when kernel-level insight will help root-cause).
+
+---
+
+# 9. TESTING MATRIX
+- Unit tests: fast, deterministic. Use `googletest`. Unit coverage target >= 80% on change-critical modules.
+- Integration tests: exercise network/disk/consensus situations in CI `tests/integration/` (containers permissible).
+- Fuzzing: fuzz protocol parsers and on-disk readers (libFuzzer/AFL). CI should run quick fuzz harnesses; nightly extended fuzz.
+- Regression/perf tests: harnessed in `bench/` with deterministic datasets. CI job to run small perf checks; nightly full perf suite.
+- Chaos tests: simple partition/restart/IO-delay tests in `tests/chaos/`, executed nightly or on-demand before releases.
+- Sanitizers: ASAN/UBSAN required for modified modules in PR CI.
+
+---
+
+# 10. PERFORMANCE REQUIREMENTS & BENCHMARKS
+- Every perf-sensitive PR must include:
+  - harness used (link to `bench/` script)
+  - baseline numbers (before)
+  - current numbers (after)
+  - environment description (CPU, memory, kernel, disk)
+  - flamegraph & `perf` output (attach as artifact)
+- Regression policy: >10% p95/p99 regression must block merge unless approved with mitigation plan.
+- SLO examples (project-specific; include actual values in `docs/SLOS.md`):
+  - Request latency p99 ≤

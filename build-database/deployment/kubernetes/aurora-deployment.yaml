@@ -1,0 +1,389 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aurora-db
+  labels:
+    name: aurora-db
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aurora-config
+  namespace: aurora-db
+data:
+  aurora.toml: |
+    [database]
+    max_connections = 1000
+    buffer_pool_size = "2GB"
+    max_tables = 10000
+    max_columns_per_table = 1000
+
+    [storage]
+    data_directory = "/data"
+    wal_directory = "/data/wal"
+    enable_compression = true
+    compaction_threads = 4
+
+    [network]
+    bind_address = "0.0.0.0:5432"
+    http_bind_address = "0.0.0.0:8080"
+    max_connections_per_ip = 100
+
+    [jit]
+    enabled = true
+    optimization_level = "aggressive"
+    cache_size_mb = 512
+    max_compilation_time_ms = 1000
+
+    [logging]
+    level = "info"
+    format = "json"
+    enable_audit_log = true
+
+    [security]
+    enable_ssl = true
+    ssl_cert_file = "/certs/tls.crt"
+    ssl_key_file = "/certs/tls.key"
+    password_encryption = "scrypt"
+
+    [cluster]
+    mode = "cluster"
+    cluster_name = "aurora-cluster"
+    node_id = "auto"
+    gossip_interval = "1s"
+    heartbeat_interval = "5s"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: aurora-secrets
+  namespace: aurora-db
+type: Opaque
+data:
+  # Base64 encoded passwords and keys
+  admin-password: YXVyb3JhX2FkbWluX3Bhc3N3b3Jk  # aurora_admin_password
+  jwt-secret: c2VjcmV0X2p3dF9zaWduaW5nX2tleQ==  # secret_jwt_signing_key
+  encryption-key: ZW5jcnlwdGlvbl9tYXN0ZXJfa2V5  # encryption_master_key
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: aurora-service-account
+  namespace: aurora-db
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: aurora-cluster-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "services", "endpoints", "configmaps", "secrets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "statefulsets", "replicasets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: aurora-cluster-role-binding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: aurora-cluster-role
+subjects:
+- kind: ServiceAccount
+  name: aurora-service-account
+  namespace: aurora-db
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: aurora-data-pvc
+  namespace: aurora-db
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi
+  storageClassName: fast-ssd
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aurora-db-service
+  namespace: aurora-db
+  labels:
+    app: aurora-db
+spec:
+  selector:
+    app: aurora-db
+    role: primary
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: 5432
+  - name: http
+    port: 8080
+    targetPort: 8080
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: aurora-db-read-service
+  namespace: aurora-db
+  labels:
+    app: aurora-db
+spec:
+  selector:
+    app: aurora-db
+  ports:
+  - name: postgres
+    port: 5432
+    targetPort: 5432
+  type: ClusterIP
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: aurora-db-primary
+  namespace: aurora-db
+  labels:
+    app: aurora-db
+    role: primary
+spec:
+  serviceName: aurora-db-service
+  replicas: 1
+  selector:
+    matchLabels:
+      app: aurora-db
+      role: primary
+  template:
+    metadata:
+      labels:
+        app: aurora-db
+        role: primary
+    spec:
+      serviceAccountName: aurora-service-account
+      containers:
+      - name: aurora-db
+        image: aurora-db:latest
+        ports:
+        - containerPort: 5432
+          name: postgres
+        - containerPort: 8080
+          name: http
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: AURORA_NODE_ROLE
+          value: "primary"
+        - name: AURORA_CLUSTER_SIZE
+          value: "3"
+        - name: AURORA_JIT_ENABLED
+          value: "true"
+        - name: AURORA_BUFFER_POOL_SIZE
+          value: "2GB"
+        volumeMounts:
+        - name: aurora-data
+          mountPath: /data
+        - name: aurora-config
+          mountPath: /etc/aurora
+          readOnly: true
+        - name: aurora-certs
+          mountPath: /certs
+          readOnly: true
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "2000m"
+          limits:
+            memory: "8Gi"
+            cpu: "4000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        startupProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 30
+      volumes:
+      - name: aurora-config
+        configMap:
+          name: aurora-config
+      - name: aurora-certs
+        secret:
+          secretName: aurora-tls-cert
+  volumeClaimTemplates:
+  - metadata:
+      name: aurora-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 100Gi
+      storageClassName: fast-ssd
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: aurora-db-replicas
+  namespace: aurora-db
+  labels:
+    app: aurora-db
+    role: replica
+spec:
+  serviceName: aurora-db-service
+  replicas: 2
+  selector:
+    matchLabels:
+      app: aurora-db
+      role: replica
+  template:
+    metadata:
+      labels:
+        app: aurora-db
+        role: replica
+    spec:
+      serviceAccountName: aurora-service-account
+      containers:
+      - name: aurora-db
+        image: aurora-db:latest
+        ports:
+        - containerPort: 5432
+          name: postgres
+        - containerPort: 8080
+          name: http
+        - containerPort: 9090
+          name: metrics
+        env:
+        - name: AURORA_NODE_ROLE
+          value: "replica"
+        - name: AURORA_PRIMARY_SERVICE
+          value: "aurora-db-service.aurora-db.svc.cluster.local"
+        - name: AURORA_JIT_ENABLED
+          value: "true"
+        - name: AURORA_BUFFER_POOL_SIZE
+          value: "1GB"
+        volumeMounts:
+        - name: aurora-data
+          mountPath: /data
+        - name: aurora-config
+          mountPath: /etc/aurora
+          readOnly: true
+        resources:
+          requests:
+            memory: "2Gi"
+            cpu: "1000m"
+          limits:
+            memory: "4Gi"
+            cpu: "2000m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+      volumes:
+      - name: aurora-config
+        configMap:
+          name: aurora-config
+  volumeClaimTemplates:
+  - metadata:
+      name: aurora-data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 50Gi
+      storageClassName: standard
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aurora-db-ingress
+  namespace: aurora-db
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+spec:
+  tls:
+  - hosts:
+    - aurora-db.example.com
+    secretName: aurora-db-tls
+  rules:
+  - host: aurora-db.example.com
+    http:
+      paths:
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: aurora-db-service
+            port:
+              number: 8080
+      - path: /metrics
+        pathType: Prefix
+        backend:
+          service:
+            name: aurora-db-service
+            port:
+              number: 9090
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: aurora-db-init
+  namespace: aurora-db
+  labels:
+    app: aurora-db
+    component: init
+spec:
+  restartPolicy: OnFailure
+  containers:
+  - name: init
+    image: aurora-db:latest
+    command: ["aurora-db", "init", "--cluster"]
+    env:
+    - name: AURORA_CLUSTER_SIZE
+      value: "3"
+    volumeMounts:
+    - name: aurora-data
+      mountPath: /data
+  volumes:
+  - name: aurora-data
+    persistentVolumeClaim:
+      claimName: aurora-data-pvc

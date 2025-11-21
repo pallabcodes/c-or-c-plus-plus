@@ -1,0 +1,210 @@
+# Algorithms Module Overview
+
+## Context
+This code is written by an SDE 2 backend and low level system engineer working with top tier product companies including Google, Atlassian, Bloomberg, PayPal, Stripe, Uber, Amazon, and other top tier silicon valley companies. This algorithm implementation must meet enterprise production standards suitable for principal level engineering review and must be comparable to top tier implementations used in production systems at these companies.
+
+## Purpose
+This module covers the design and implementation of production grade algorithms in C and C plus plus. All code must follow production grade standards suitable for principal level code review and must be production ready for deployment in high performance systems requiring efficient algorithmic operations, optimal time and space complexity, and robust correctness.
+
+## Scope
+* Applies to all C and C plus plus code in algorithms directory
+* Extends repository root rules defined in the root `.cursor/rules/` files
+* Covers all aspects of algorithms from basic to advanced techniques
+* Code quality standards align with expectations from top tier companies like Google, Bloomberg, Uber, and Amazon
+
+## Top Tier Product Comparisons
+
+### Google Production Systems
+* Google Search ranking algorithms
+* PageRank and graph algorithms
+* MapReduce and distributed algorithms
+* High performance sorting and searching
+* Production tested at massive scale
+
+### Bloomberg Terminal Systems
+* Financial data processing algorithms
+* Real time market data algorithms
+* High frequency trading algorithms
+* Efficient graph algorithms for financial networks
+* Production tested in critical financial systems
+
+### Uber Geospatial Systems
+* Route optimization algorithms (Dijkstra, A*)
+* Spatial algorithms for location services
+* Matching algorithms for ride sharing
+* Graph algorithms for transportation networks
+* Production tested at scale
+
+### Amazon Production Systems
+* Recommendation algorithms
+* Search and ranking algorithms
+* Inventory optimization algorithms
+* Graph algorithms for supply chain
+* Production tested at massive scale
+
+### Standard Template Library (STL)
+* C++ standard library algorithms
+* Industry standard implementations
+* Performance characteristics and guarantees
+* Time and space complexity specifications
+
+## Algorithm Categories
+
+### Arrays and Strings
+* **Sorting**: Merge sort, quick sort, heap sort, radix sort
+* **Searching**: Binary search, linear search, interpolation search
+* **Sliding Window**: Maximum subarray, minimum window substring
+* **Two Pointers**: Pair with target sum, trapping rainwater
+* **String Algorithms**: KMP, Rabin Karp, longest palindromic substring
+
+### Dynamic Programming
+* **Knapsack**: 0/1 knapsack, unbounded knapsack
+* **Subsequence**: Longest increasing subsequence, longest common subsequence
+* **String DP**: Edit distance, interleaving strings
+* **Matrix DP**: Longest common subsequence, min cost path
+* **Bitmasking**: Traveling salesman, subset iteration
+
+### Graph Algorithms
+* **Traversal**: BFS, DFS
+* **Shortest Path**: Dijkstra, Bellman Ford, Floyd Warshall
+* **MST**: Kruskal, Prim algorithms
+* **Topological Sort**: Course schedule, dependency resolution
+* **Union Find**: Connected components, cycle detection
+
+### Greedy Algorithms
+* **Activity Selection**: Scheduling problems
+* **Job Scheduling**: Interval scheduling
+* **Huffman Coding**: Data compression
+* **Minimum Spanning Tree**: Greedy MST algorithms
+
+### Backtracking
+* **N Queens**: Constraint satisfaction
+* **Subset Generation**: Power set, combinations
+* **Tree Construction**: Build trees from traversals
+* **Constraint Solving**: General backtracking patterns
+
+### Divide and Conquer
+* **Merge Sort**: Divide and conquer sorting
+* **Quick Sort**: Partition based sorting
+* **Binary Search**: Divide and conquer search
+* **2D Divide and Conquer**: Matrix operations
+
+### Tree Algorithms
+* **Traversals**: Inorder, preorder, postorder, level order
+* **BST Operations**: Search, insert, delete, validation
+* **Segment Trees**: Range queries
+* **Fenwick Trees**: Prefix sum queries
+* **Tree Construction**: Build from traversals
+
+### Heap Algorithms
+* **Priority Queue**: Heap based priority queue
+* **Kth Largest**: Heap selection algorithms
+* **Merge K Sorted**: Heap merging
+* **Median Maintenance**: Heap based median
+
+### Trie Algorithms
+* **Prefix Matching**: Autocomplete, spell checking
+* **String Search**: Efficient string search
+* **IP Routing**: Longest prefix matching
+* **Compression**: Trie compression techniques
+
+### Mathematics Algorithms
+* **Number Theory**: GCD, LCM, prime factorization
+* **Combinatorics**: Permutations, combinations
+* **Geometry**: Computational geometry algorithms
+* **Modular Arithmetic**: Modular operations
+
+## Learning Resources and References
+
+### Essential Reading
+
+#### Books
+* **"Introduction to Algorithms" (CLRS)** - Comprehensive algorithms and data structures
+* **"The Art of Computer Programming" (Knuth)** - Fundamental algorithms and analysis
+* **"Algorithm Design" (Kleinberg, Tardos)** - Algorithm design techniques
+* **"Algorithms on Strings" (Gusfield)** - String algorithms
+
+#### Research Papers
+* **Sorting**: Quicksort (Hoare), Merge Sort, Heapsort (Williams)
+* **Graph Algorithms**: Shortest Path Algorithms, Minimum Spanning Tree, Network Flows
+* **String Algorithms**: KMP (Knuth, Morris, Pratt), Rabin Karp
+* **Dynamic Programming**: DP techniques and optimizations
+
+#### Open Source References
+* **Google Abseil**: https://github.com/abseil/abseil-cpp
+* **Standard Template Library (STL)**: C++ standard library
+* **Boost C++ Libraries**: https://www.boost.org/
+* **LLVM Algorithms**: https://github.com/llvm/llvm-project
+
+#### Online Resources
+* **C++ Reference**: cppreference.com
+* **Algorithm Visualizations**: Visualgo.net
+* **Tutorials**: Algorithm tutorials, competitive programming
+
+## Learning Path
+
+### Phase 1: Fundamentals (Week 1-4)
+1. Sorting: Merge sort, quick sort, heap sort
+2. Searching: Binary search, linear search
+3. Arrays: Sliding window, two pointers
+4. Resources: CLRS, online tutorials
+
+### Phase 2: Advanced Arrays (Week 5-8)
+1. String Algorithms: KMP, Rabin Karp
+2. Dynamic Programming: Basic DP patterns
+3. Greedy Algorithms: Activity selection, scheduling
+4. Resources: CLRS, algorithm books
+
+### Phase 3: Graphs (Week 9-12)
+1. Graph Traversal: BFS, DFS
+2. Shortest Path: Dijkstra, Bellman Ford
+3. MST: Kruskal, Prim
+4. Resources: CLRS, graph algorithm books
+
+### Phase 4: Advanced Topics (Week 13-16)
+1. Advanced DP: Bitmasking, optimizations
+2. Tree Algorithms: Segment trees, Fenwick trees
+3. Advanced Graphs: Network flows, matching
+4. Resources: Research papers, advanced books
+
+## Tools and Utilities
+
+### Development Tools
+* **Compiler**: GCC, Clang with sanitizers
+* **Debugger**: GDB for debugging
+* **Profiler**: perf, valgrind for profiling
+
+### Testing Tools
+* **Unit Testing**: Google Test, Catch2
+* **Benchmarking**: Google Benchmark
+* **Coverage**: gcov, lcov
+
+### Static Analysis
+* **Linters**: clang-tidy, cppcheck
+* **Static Analyzers**: Coverity, PVS-Studio
+
+## Implementation Goals
+
+### Correctness
+* Correct algorithm implementation
+* Proper handling of edge cases
+* Correct complexity analysis
+* Thread safety where applicable
+
+### Performance
+* Optimal algorithmic complexity
+* Efficient memory usage
+* Cache friendly design
+* SIMD optimizations where applicable
+
+### Reliability
+* Robust error handling
+* Memory leak prevention
+* Resource cleanup
+* Graceful degradation
+
+### Maintainability
+* Clean, readable code
+* Comprehensive documentation
+* Extensive test coverage
+* Clear error messages

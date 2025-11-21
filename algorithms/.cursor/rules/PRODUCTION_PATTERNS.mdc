@@ -1,0 +1,167 @@
+# Production Pattern Recognition System
+
+## Goal
+
+Extract ingenious, hacky, god-mode algorithmic techniques from **REAL production codebases** (Node.js, Linux kernel, React, Redis, PostgreSQL, etc.), **GitHub repositories**, **research papers**, and **technical blogs**. Document ALL variants and build pattern recognition for when to apply them in production code.
+
+**NOT LeetCode problems** - Real implementations from production systems, research, and open-source projects.
+
+## Source Strategy
+
+We extract patterns from **multiple sources**:
+
+1. **Local Production Codebases**: Linux kernel, Node.js/V8 (already available)
+2. **GitHub Repositories**: Redis, PostgreSQL, nginx, React, MongoDB, Kafka, etc.
+3. **Research Papers**: ACM, IEEE, arXiv papers on algorithms and data structures
+4. **Technical Blogs**: Engineering blogs from Google, Facebook, Netflix, Uber, etc.
+5. **Open Source Documentation**: Official docs with code examples
+
+## Pattern Recognition Decision Tree
+
+### Entry Point: What Are You Trying to Do?
+
+```
+┌─────────────────────────────────────────────────────────┐
+│  What problem are you solving?                         │
+└─────────────────────────────────────────────────────────┘
+                        │
+        ┌───────────────┼───────────────┐
+        │               │               │
+    SEARCH          PROCESS         TRANSFORM
+    (Find)         (Compute)        (Modify)
+```
+
+### SEARCH Problems
+
+**Is data sorted?**
+- YES → Binary search variants (V8 hash-based, ICU hybrid, overflow-safe, small array optimization)
+- NO → Linear search or hash map
+
+### PROCESS Problems
+
+**What are you processing?**
+- Subarrays/Substrings → Sliding window (Linux kfifo, Brotli ring buffer, V8 simple ring buffer)
+- Pairs/Triplets → Two pointers (opposite ends, fast/slow, same direction)
+- Multiple sequences → K-way merge (heap-based, divide-and-conquer)
+
+### TRANSFORM Problems
+
+**What transformation?**
+- Sort → Sorting algorithms
+- Filter/Remove → Two pointers (same direction)
+- Partition → Two pointers
+
+## Extracted Patterns
+
+### Binary Search (6 Variants)
+- **Standard**: Generic binary search
+- **V8 Hash-Based**: Hash comparison + linear scan for collisions
+- **ICU Hybrid**: Binary until small, then linear
+- **V8 Overflow-Safe**: Conditional mid calculation
+- **V8 Small Array**: Linear for ≤8 elements
+- **Linux Kernel**: Generic type-agnostic
+
+### Sliding Window (3 Variants)
+- **Linux kfifo**: Lock-free ring buffer, power-of-2 optimization
+- **Brotli Ring Buffer**: Tail duplication for compression
+- **V8 Simple Ring Buffer**: Constexpr, small fixed-size
+
+### Two Pointers (3 Variants)
+- **Opposite Ends**: Sorted array, pairs/triplets
+- **Fast/Slow**: Linked list, cycle detection (Floyd's algorithm)
+- **Same Direction**: Remove duplicates, in-place modification
+
+### K-way Merge (2 Variants)
+- **Heap-Based**: Small-medium K, priority queue
+- **Divide-and-Conquer**: Large K, recursive merge
+
+## Pattern Recognition Checklist
+
+Before choosing an algorithm, ask:
+
+1. **What am I trying to do?** (Search, Process, Transform)
+2. **What's the data structure?** (Array, Linked List, Tree, Graph)
+3. **Is data sorted?** (Yes/No/Can sort)
+4. **What are the constraints?** (Size, time, space)
+5. **What's the operation?** (Find, compute, modify)
+
+## Key Insights from Production Codebases
+
+### V8/Node.js Insights
+1. **Adaptive Algorithms**: Different algorithms based on input size
+2. **Hash-Based Optimization**: Use hash comparison when key comparison is expensive
+3. **Cache-Friendly**: Linear search for small arrays (better cache locality)
+4. **Overflow Safety**: Conditional fast/safe paths based on array size
+5. **Hybrid Approaches**: Combine binary and linear search for optimal performance
+
+### Linux Kernel Insights
+1. **Performance First**: Every optimization matters in kernel
+2. **Lock-Free When Possible**: Single reader/writer needs no locks
+3. **Power-of-2 Optimization**: Bitwise operations instead of modulo
+4. **Memory Barriers**: Critical for multi-core systems
+5. **Generic Patterns**: Type-agnostic implementations for reusability
+
+### Brotli Insights
+1. **Tail Duplication**: Avoid modulo operations for small reads
+2. **Lookback Optimization**: Copy last bytes before buffer start
+3. **Lazy Allocation**: Only allocate full buffer when needed
+
+## Universal Applications
+
+### Binary Search
+- Version control (git bisect)
+- UI rendering
+- Game engines
+- Database indexing
+
+### Sliding Window
+- Rate limiting
+- Network packet analysis
+- Log analysis
+- Compression algorithms
+
+### Two Pointers
+- Linked list operations
+- Array partitioning
+- String processing
+- Cycle detection
+
+### K-way Merge
+- External sorting
+- Database merge joins
+- Log merging
+- Search engine result merging
+
+## Extraction Methodology
+
+### Step 1: Identify Pattern to Extract
+- Choose pattern (e.g., hash table, red-black tree)
+- Determine what variants exist
+
+### Step 2: Search Multiple Sources
+- Search local codebases (Linux, Node.js)
+- Search GitHub repos (Redis, PostgreSQL, etc.)
+- Search research papers
+- Search technical blogs
+
+### Step 3: Extract Variants
+- For each source, extract implementation
+- Document source (file path, commit hash, URL)
+- Note key optimizations/features
+
+### Step 4: Categorize Variants
+- Group by optimization technique
+- Group by use case
+- Group by performance characteristics
+
+### Step 5: Document
+- Create variant file with source attribution
+- Update pattern recognition guide
+- Update extraction notes
+
+## Next Patterns to Extract
+
+1. **Hash Tables**: Redis, PostgreSQL, Linux kernel, research papers
+2. **Trees**: Red-black trees, B-trees from multiple sources
+3. **Graph Algorithms**: React, LLVM, research papers
+4. **String Matching**: V8, Linux kernel, research papers

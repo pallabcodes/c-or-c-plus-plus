@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cyclone-event-loop
+  labels:
+    app: cyclone
+    component: event-loop
+spec:
+  replicas: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: cyclone
+      component: event-loop
+  template:
+    metadata:
+      labels:
+        app: cyclone
+        component: event-loop
+    spec:
+      containers:
+      - name: cyclone
+        image: cyclone:latest
+        ports:
+        - containerPort: 8080
+          name: http
+          protocol: TCP
+        - containerPort: 9090
+          name: metrics
+          protocol: TCP
+        env:
+        - name: RUST_LOG
+          value: "info"
+        - name: CYCLONE_SERVER_PORT
+          value: "8080"
+        - name: CYCLONE_METRICS_ENABLED
+          value: "true"
+        resources:
+          requests:
+            cpu: "1000m"
+            memory: "1Gi"
+          limits:
+            cpu: "2000m"
+            memory: "2Gi"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 8080
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /ready
+            port: 8080
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        lifecycle:
+          preStop:
+            exec:
+              command: ["/bin/sh", "-c", "sleep 15"]
+        volumeMounts:
+        - name: config
+          mountPath: /etc/cyclone
+          readOnly: true
+        - name: tls-certs
+          mountPath: /etc/ssl/certs
+          readOnly: true
+        - name: tls-keys
+          mountPath: /etc/ssl/private
+          readOnly: true
+      volumes:
+      - name: config
+        configMap:
+          name: cyclone-config
+      - name: tls-certs
+        secret:
+          secretName: cyclone-tls
+      - name: tls-keys
+        secret:
+          secretName: cyclone-tls
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  app: cyclone
+                  component: event-loop
+              topologyKey: kubernetes.io/hostname

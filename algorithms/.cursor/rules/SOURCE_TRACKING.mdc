@@ -1,0 +1,234 @@
+---
+alwaysApply: true
+---
+
+# Pattern Extraction Source Tracking
+
+## Source Categories
+
+### 1. Production Codebases (Local)
+- **Linux Kernel**: `/Users/picon/Learning/c-or-c-plus-plus/linux/`
+- **Node.js/V8**: `/Users/picon/Learning/c-or-c-plus-plus/node/`
+
+### 2. GitHub Repositories (Online)
+- **Redis**: https://github.com/redis/redis
+- **PostgreSQL**: https://github.com/postgres/postgres
+- **nginx**: https://github.com/nginx/nginx
+- **React**: https://github.com/facebook/react
+- **Chromium/V8**: https://github.com/chromium/chromium
+- **LLVM**: https://github.com/llvm/llvm-project
+- **MongoDB**: https://github.com/mongodb/mongo
+- **Kafka**: https://github.com/apache/kafka
+- **RabbitMQ**: https://github.com/rabbitmq/rabbitmq-server
+- **RocksDB**: https://github.com/facebook/rocksdb
+- **LevelDB**: https://github.com/google/leveldb
+- **ScyllaDB**: https://github.com/scylladb/scylla
+- **ClickHouse**: https://github.com/ClickHouse/ClickHouse
+
+### 3. Research Papers
+- **ACM Digital Library**: https://dl.acm.org/
+- **IEEE Xplore**: https://ieeexplore.ieee.org/
+- **arXiv**: https://arxiv.org/
+- **Google Scholar**: https://scholar.google.com/
+
+### 4. Technical Blogs & Articles
+- **Google Research Blog**: https://research.google/blog/
+- **Facebook Engineering Blog**: https://engineering.fb.com/
+- **Netflix Tech Blog**: https://netflixtechblog.com/
+- **Uber Engineering Blog**: https://eng.uber.com/
+- **High Scalability**: http://highscalability.com/
+- **Martin Kleppmann's Blog**: https://martin.kleppmann.com/
+- **Brendan Gregg's Blog**: http://www.brendangregg.com/
+
+### 5. Open Source Documentation
+- **Linux Kernel Documentation**: https://www.kernel.org/doc/
+- **Redis Documentation**: https://redis.io/docs/
+- **PostgreSQL Documentation**: https://www.postgresql.org/docs/
+- **nginx Documentation**: https://nginx.org/en/docs/
+
+## Extraction Strategy by Source Type
+
+### Production Codebases (Local)
+**Method**: Direct code analysis
+- Read source files
+- Extract implementations
+- Document patterns
+
+**Tools**: `grep`, `codebase_search`, file reading
+
+### GitHub Repositories
+**Method**: Clone and analyze
+- Clone repository
+- Search for patterns
+- Extract implementations
+- Document with commit hashes
+
+**Tools**: `git clone`, `grep`, web search for specific files
+
+### Research Papers
+**Method**: Read and implement
+- Read paper
+- Understand algorithm
+- Implement variant
+- Document paper reference
+
+**Tools**: Web search, PDF reading
+
+### Technical Blogs
+**Method**: Read and extract
+- Read blog post
+- Extract code examples
+- Understand context
+- Document source
+
+**Tools**: Web search
+
+## Pattern Extraction Workflow
+
+### Step 1: Identify Pattern to Extract
+- Choose pattern (e.g., hash table, red-black tree)
+- Determine what variants exist
+
+### Step 2: Search Multiple Sources
+- Search local codebases (Linux, Node.js)
+- Search GitHub repos (Redis, PostgreSQL, etc.)
+- Search research papers
+- Search technical blogs
+
+### Step 3: Extract Variants
+- For each source, extract implementation
+- Document source (file path, commit hash, URL)
+- Note key optimizations/features
+
+### Step 4: Categorize Variants
+- Group by optimization technique
+- Group by use case
+- Group by performance characteristics
+
+### Step 5: Document
+- Create variant file with source attribution
+- Update pattern recognition guide
+- Update extraction notes
+
+## Source Attribution Format
+
+### Codebase Source
+```markdown
+**Source**: `linux/kernel/sched/core.c` (lines 1234-1256)
+**Commit**: `abc123def456` (if applicable)
+**Author**: Linus Torvalds
+```
+
+### GitHub Repository
+```markdown
+**Source**: https://github.com/redis/redis/blob/unstable/src/dict.c#L123-145
+**Repository**: redis/redis
+**File**: `src/dict.c`
+**Lines**: 123-145
+```
+
+### Research Paper
+```markdown
+**Source**: "A Lock-Free Hash Table" by John Doe
+**Paper**: ACM SIGPLAN 2020
+**DOI**: 10.1145/1234567.1234568
+**URL**: https://doi.org/10.1145/1234567.1234568
+```
+
+### Blog Post
+```markdown
+**Source**: "High-Performance Hash Tables" by Jane Smith
+**Blog**: https://engineering.company.com/hash-tables
+**Date**: 2023-01-15
+```
+
+## Priority Sources by Pattern Type
+
+### Hash Tables
+1. Redis (dict.c)
+2. PostgreSQL (hash tables)
+3. Linux kernel (hashtable.h)
+4. Research papers (lock-free hash tables)
+
+### Trees
+1. Linux kernel (rbtree.h)
+2. PostgreSQL (B-trees)
+3. MongoDB (B-trees)
+4. Research papers (B+ trees, red-black trees)
+
+### Graph Algorithms
+1. LLVM (graph algorithms)
+2. React (fiber reconciliation)
+3. Research papers (graph algorithms)
+
+### String Matching
+1. V8 (string search)
+2. Linux kernel (string matching)
+3. Research papers (KMP, Boyer-Moore)
+
+### Memory Management
+1. Linux kernel (slab allocator)
+2. Redis (memory management)
+3. jemalloc (memory allocator)
+4. Research papers (memory allocators)
+
+## Extraction Checklist
+
+For each pattern extraction:
+
+- [ ] Search local codebases (Linux, Node.js)
+- [ ] Search GitHub repositories (at least 3-5 repos)
+- [ ] Search research papers (at least 2-3 papers)
+- [ ] Search technical blogs (at least 2-3 blogs)
+- [ ] Extract all variants found
+- [ ] Document source for each variant
+- [ ] Categorize variants
+- [ ] Create pattern recognition guide
+- [ ] Update extraction notes
+
+## Next Patterns to Extract (Multi-Source)
+
+### Hash Tables
+- **Redis**: Open addressing with incremental rehashing
+- **PostgreSQL**: Chaining with dynamic resizing
+- **Linux Kernel**: Lock-free hash tables
+- **Research**: Cuckoo hashing, Robin Hood hashing
+
+### Red-Black Trees
+- **Linux Kernel**: Generic red-black tree implementation
+- **PostgreSQL**: B-tree implementation
+- **MongoDB**: B-tree with WiredTiger
+- **Research**: Left-leaning red-black trees
+
+### B-Trees
+- **PostgreSQL**: B-tree indexes
+- **MongoDB**: B-tree storage
+- **Research**: B+ trees, B* trees
+
+### Graph Algorithms
+- **React**: Fiber reconciliation (graph traversal)
+- **LLVM**: Control flow graph algorithms
+- **Research**: Graph algorithms papers
+
+### String Matching
+- **V8**: String search algorithms
+- **Linux Kernel**: String matching
+- **Research**: KMP, Boyer-Moore, Rabin-Karp
+
+## Tools and Resources
+
+### Code Search
+- **GitHub Code Search**: https://github.com/search
+- **SourceGraph**: https://sourcegraph.com/
+- **GitHub Advanced Search**: https://github.com/search/advanced
+
+### Research Papers
+- **Google Scholar**: https://scholar.google.com/
+- **Semantic Scholar**: https://www.semanticscholar.org/
+- **DBLP**: https://dblp.org/
+
+### Pattern Discovery
+- **Awesome Lists**: https://github.com/sindresorhus/awesome
+- **Papers with Code**: https://paperswithcode.com/
+- **Algorithm Visualizations**: https://visualgo.net/
+

@@ -1,0 +1,178 @@
+# AuroraDB Production Configuration
+# This file contains production-ready settings for AuroraDB
+
+[database]
+# Database connection settings
+max_connections = 1000
+connection_timeout_ms = 30000
+idle_timeout_ms = 300000
+
+# Storage settings
+data_directory = "/aurora/data"
+wal_directory = "/aurora/data/wal"
+enable_compression = true
+compaction_threads = 4
+buffer_pool_size = "2GB"
+
+# Performance settings
+enable_jit = true
+jit_cache_size_mb = 512
+jit_optimization_level = "aggressive"
+query_cache_size_mb = 256
+
+[storage]
+# Storage engine settings
+default_storage_engine = "hybrid"
+enable_compression = true
+compression_algorithm = "lz4"
+page_size_kb = 8
+max_concurrent_compactions = 4
+
+# B-tree settings
+btree_order = 256
+enable_prefix_compression = true
+
+# LSM settings
+lsm_levels = 7
+lsm_size_ratio = 10
+enable_bloom_filters = true
+bloom_filter_bits_per_key = 10
+
+[network]
+# Network settings
+bind_address = "0.0.0.0:5432"
+http_bind_address = "0.0.0.0:8080"
+metrics_bind_address = "0.0.0.0:9090"
+
+# Connection pooling
+max_connections_per_ip = 100
+connection_backlog = 128
+enable_ssl = true
+ssl_cert_file = "/etc/ssl/certs/aurora.crt"
+ssl_key_file = "/etc/ssl/private/aurora.key"
+
+# Timeouts
+connection_timeout_ms = 30000
+query_timeout_ms = 300000
+idle_timeout_ms = 300000
+
+[security]
+# Security settings
+enable_authentication = true
+password_encryption = "scrypt"
+session_timeout_ms = 3600000
+max_login_attempts = 5
+enable_audit_log = true
+
+# TLS settings
+tls_min_version = "TLSv1.2"
+tls_cipher_suites = [
+    "ECDHE-ECDSA-AES128-GCM-SHA256",
+    "ECDHE-RSA-AES128-GCM-SHA256",
+    "ECDHE-ECDSA-AES256-GCM-SHA384",
+    "ECDHE-RSA-AES256-GCM-SHA384"
+]
+
+[cluster]
+# Cluster settings
+mode = "cluster"
+cluster_name = "aurora-cluster"
+node_id = "auto"
+discovery_method = "kubernetes"
+
+# Replication settings
+replication_factor = 3
+sync_replication = false
+max_replication_lag_ms = 1000
+
+# Consensus settings
+election_timeout_ms = 5000
+heartbeat_interval_ms = 1000
+consensus_protocol = "raft"
+
+[logging]
+# Logging settings
+level = "info"
+format = "json"
+enable_console_logging = true
+enable_file_logging = true
+log_directory = "/aurora/logs"
+max_log_file_size_mb = 100
+max_log_files = 10
+
+# Audit logging
+enable_audit_log = true
+audit_log_level = "info"
+
+[monitoring]
+# Monitoring settings
+enable_metrics = true
+metrics_interval_ms = 15000
+enable_health_checks = true
+health_check_interval_ms = 30000
+
+# Prometheus settings
+prometheus_enabled = true
+prometheus_path = "/metrics"
+
+# Alerting thresholds
+alert_high_connection_count = 800
+alert_high_memory_usage_percent = 85
+alert_high_disk_usage_percent = 90
+alert_high_query_latency_ms = 1000
+
+[maintenance]
+# Maintenance settings
+auto_vacuum_enabled = true
+vacuum_interval_hours = 6
+auto_analyze_enabled = true
+analyze_interval_hours = 12
+
+# Backup settings
+backup_enabled = true
+backup_interval_hours = 24
+backup_retention_days = 30
+backup_directory = "/aurora/backups"
+
+# Index maintenance
+auto_reindex_enabled = true
+reindex_interval_days = 7
+
+[query]
+# Query processing settings
+max_query_length_bytes = 1048576  # 1MB
+enable_query_cache = true
+query_cache_size_mb = 256
+enable_query_logging = false
+slow_query_threshold_ms = 1000
+
+# Optimizer settings
+enable_cost_based_optimization = true
+statistics_update_interval_hours = 6
+histogram_buckets = 100
+
+[jit]
+# JIT compilation settings
+enabled = true
+optimization_level = "aggressive"
+cache_size_mb = 512
+max_compilation_time_ms = 1000
+enable_simd = true
+enable_loop_unrolling = true
+enable_inlining = true
+
+[vector]
+# Vector processing settings
+enable_vector_extensions = true
+vector_similarity_metrics = ["cosine", "euclidean", "dot_product"]
+max_vector_dimensions = 4096
+vector_index_type = "hnsw"
+hnsw_ef_construction = 200
+hnsw_m = 16
+
+[experimental]
+# Experimental features (use with caution)
+enable_experimental_features = false
+enable_query_pipelining = false
+enable_distributed_joins = false
+enable_adaptive_compression = false

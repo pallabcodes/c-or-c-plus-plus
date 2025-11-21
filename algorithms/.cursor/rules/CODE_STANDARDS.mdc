@@ -1,0 +1,238 @@
+# Code Quality and Testing Standards
+
+## Code Quality Standards
+
+### Function Size Limits
+* **Maximum function length**: 50 lines (excluding comments and blank lines)
+* **Rationale**: Functions exceeding 50 lines become difficult to understand, test, and maintain
+* **Exception**: Complex algorithms may extend to 60 lines with justification
+
+### File Size Limits
+* **Maximum file length**: 200 lines (excluding comments and blank lines)
+* **Rationale**: Files exceeding 200 lines become difficult to navigate and understand
+* **Exception**: Header files with extensive type definitions may extend to 250 lines
+
+### Cyclomatic Complexity
+* **Maximum complexity**: 10 per function
+* **Rationale**: High complexity indicates functions doing too much
+* **Measurement**: Count decision points (if, while, for, switch, &&, ||, ?:)
+* **Exception**: Complex algorithms (e.g., graph algorithms) may have complexity up to 15 with justification
+
+### Code Style
+
+#### Naming Conventions
+* **Functions**: `snake_case` (e.g., `merge_sort`, `binary_search`, `dijkstra_shortest_path`)
+* **Classes**: `PascalCase` (e.g., `Graph`, `PriorityQueue`)
+* **Types**: `snake_case` with `_t` suffix (e.g., `node_t`, `edge_t`)
+* **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_SIZE`, `INFINITY`)
+
+#### Indentation
+* **Indentation**: 4 spaces (no tabs)
+* **Continuation**: Align continuation lines with opening delimiter
+
+#### Comments
+* **Function comments**: Required for all public functions
+* **Algorithm explanation**: Document algorithm approach and intuition
+* **Complexity**: Document time and space complexity
+* **Invariants**: Document algorithm invariants
+
+### Error Handling
+
+#### Input Validation
+* **All public APIs**: Must validate inputs
+* **Null pointers**: Check and return error for NULL inputs
+* **Bounds checking**: Validate array bounds and indices
+* **Preconditions**: Validate preconditions (e.g., sorted array for binary search)
+
+#### Error Reporting
+* **Return codes**: Use consistent return code conventions
+* **Error codes**: Define error codes in header files
+* **Status propagation**: Propagate errors correctly through call stack
+
+#### Error Recovery
+* **Graceful degradation**: Handle errors without crashing
+* **Partial results**: Return partial results where appropriate
+* **Invariant maintenance**: Maintain algorithm invariants on errors
+
+### Memory Safety
+
+#### Allocation
+* **Stack allocation**: Prefer stack allocation for small, fixed size structures
+* **Heap allocation**: Use heap allocation for dynamic structures
+* **RAII**: Use RAII for C++ (smart pointers, containers)
+* **Buffer sizes**: Use constants for buffer sizes, avoid magic numbers
+
+#### Bounds Checking
+* **Array access**: Always validate array indices
+* **Buffer writes**: Check buffer capacity before writes
+* **Iterator bounds**: Validate iterator bounds
+
+#### Leak Prevention
+* **Allocation pairs**: Every allocation must have corresponding deallocation
+* **Error paths**: Free resources in all error paths
+* **Destructors**: Implement proper destructors for C++
+* **Smart pointers**: Use smart pointers in C++ to prevent leaks
+
+### Algorithm Correctness
+
+#### Invariant Documentation
+* **Document invariants**: Document all algorithm invariants
+* **Maintain invariants**: Ensure invariants are maintained throughout algorithm
+* **Validate invariants**: Provide debug mode invariant validation
+
+#### Example Invariants
+* **Binary Search**: Left boundary <= target <= right boundary
+* **Quick Sort**: Elements before pivot < pivot < elements after pivot
+* **Dijkstra**: Distance to processed nodes is shortest distance
+
+## Complexity Analysis Standards
+
+### Time Complexity
+
+#### Big O Notation
+* **Definition**: Upper bound on growth rate
+* **Usage**: Worst case analysis
+* **Examples**: O(1), O(log n), O(n), O(n log n), O(n^2), O(2^n)
+
+#### Common Complexities
+* **O(1)**: Array access, hash table lookup
+* **O(log n)**: Binary search, balanced tree operations
+* **O(n)**: Linear search, array traversal
+* **O(n log n)**: Merge sort, heap sort, quick sort (average)
+* **O(n^2)**: Bubble sort, insertion sort, nested loops
+* **O(2^n)**: Subset generation, recursive Fibonacci
+
+### Space Complexity
+
+#### Auxiliary Space
+* **Definition**: Extra space used by algorithm
+* **Examples**: O(1) for in place, O(n) for arrays
+
+#### Total Space
+* **Definition**: Total space including input
+* **Examples**: O(n) for input array
+
+### Amortized Analysis
+* **Definition**: Average cost over sequence of operations
+* **Examples**: Dynamic array insertion O(1) amortized
+* **Methods**: Aggregate method, accounting method
+
+### Documentation Standards
+* **Time complexity**: Document time complexity
+* **Space complexity**: Document space complexity
+* **Best/worst/average**: Document all cases
+* **Amortized**: Document amortized complexity where applicable
+
+## Testing Standards
+
+### Testing Principles
+
+#### Comprehensive Coverage
+* **All algorithms**: Test all algorithm implementations
+* **Edge cases**: Test edge cases and boundary conditions
+* **Error cases**: Test error handling
+* **Invariants**: Test that invariants are maintained
+
+#### Automated Testing
+* **Unit tests**: Automated unit tests
+* **Integration tests**: Automated integration tests
+* **CI integration**: Run tests in CI
+
+#### Deterministic Tests
+* **Reproducible**: Tests must be reproducible
+* **Fixed seeds**: Use fixed seeds for random tests
+* **No timing**: Avoid timing dependent tests
+
+### Unit Testing
+
+#### Test Structure
+* **Test functions**: One test function per test case
+* **Test names**: Descriptive test names
+* **Setup/teardown**: Use setup and teardown functions
+* **Assertions**: Use clear assertions
+
+#### Test Coverage
+* **Line coverage**: Aim for 90%+ line coverage
+* **Branch coverage**: Aim for 90%+ branch coverage
+* **Function coverage**: Test all public functions
+
+### Property Based Testing
+* **Invariants**: Test invariants hold for random inputs
+* **Fuzzing**: Fuzz algorithms with random inputs
+* **Stress tests**: Test with large datasets
+
+### Correctness Testing
+* **Known results**: Test against known correct results
+* **Edge cases**: Test boundary conditions
+* **Corner cases**: Test unusual input patterns
+
+### Performance Testing
+
+#### Benchmarking
+* **Framework**: Use benchmarking framework (Google Benchmark)
+* **Metrics**: Measure time, memory, cache misses
+* **Reproducibility**: Ensure reproducible benchmarks
+
+#### Stress Testing
+* **Large inputs**: Test with large inputs
+* **Memory**: Test memory usage
+* **Performance**: Test performance degradation
+
+### Test Organization
+```
+tests/
+├── unit/
+│   ├── test_sorting.cpp
+│   ├── test_searching.cpp
+│   └── test_graph.cpp
+├── integration/
+│   ├── test_workflows.cpp
+│   └── test_algorithms.cpp
+├── performance/
+│   ├── benchmark_sorting.cpp
+│   └── benchmark_graph.cpp
+└── stress/
+    ├── test_large_inputs.cpp
+    └── test_memory.cpp
+```
+
+## Performance Standards
+
+### Optimization
+* **Hot paths**: Optimize frequently executed code paths
+* **Common cases**: Fast path for common cases
+* **Cache efficiency**: Design for cache friendly memory layout
+* **SIMD**: Use SIMD optimizations where applicable
+
+### Benchmarking
+* **Benchmarks**: Include benchmarks for performance critical algorithms
+* **Profiling**: Profile code to identify bottlenecks
+* **Metrics**: Measure time, memory, cache misses
+* **Comparison**: Compare with standard library implementations
+
+## Documentation Standards
+
+### API Documentation
+* **Public functions**: Document all public functions
+* **Parameters**: Document all parameters and return values
+* **Complexity**: Document time and space complexity
+* **Algorithm**: Document algorithm approach and intuition
+* **Examples**: Provide usage examples
+
+### Implementation Documentation
+* **Algorithms**: Document complex algorithms
+* **Design decisions**: Document non obvious design choices
+* **Trade offs**: Document design trade offs
+
+## Enforcement
+
+### Code Review
+* **Mandatory**: All code must be reviewed for compliance
+* **Checklist**: Use checklist to verify standards
+* **Automation**: Use tools to check function/file sizes and complexity
+
+### CI/CD
+* **Static analysis**: Run static analysis tools in CI
+* **Linting**: Run linters to check style compliance
+* **Testing**: Run tests to verify correctness
+* **Metrics**: Track code quality metrics over time

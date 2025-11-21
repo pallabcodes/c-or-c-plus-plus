@@ -1,0 +1,46 @@
+# Cyclone Production Configuration
+# Enterprise-grade settings for production deployments
+
+[server]
+bind_address = "0.0.0.0"
+port = 8080
+max_connections = 100000
+connection_timeout_seconds = 300
+worker_threads = 0  # 0 = auto-detect based on CPU cores
+
+[network]
+enable_zero_copy = true
+enable_connection_pooling = true
+connection_pool_size = 10000
+enable_syscall_batching = true
+syscall_batch_size = 128
+
+[timer]
+wheel_size = 2048
+levels = 8
+tick_duration_ms = 1
+max_timers = 1000000
+
+[metrics]
+enabled = true
+collection_interval_seconds = 15
+prometheus_export = true
+prometheus_port = 9090
+
+[circuit_breaker]
+enabled = true
+failure_threshold = 10
+success_threshold = 5
+timeout_seconds = 300
+
+[tls]
+enabled = false
+cert_file = "/etc/ssl/certs/cyclone.crt"
+key_file = "/etc/ssl/private/cyclone.key"
+client_auth = false
+
+[observability]
+structured_logging = true
+log_level = "INFO"
+request_tracing = true
+tracing_sample_rate = 0.1

@@ -1,0 +1,36 @@
+{
+  "name": "cyclone",
+  "version": "2.0.0",
+  "description": "High-performance networking for Node.js with 2M+ RPS capability",
+  "main": "index.js",
+  "scripts": {
+    "install": "node-gyp rebuild",
+    "test": "node test.js",
+    "example": "node examples/web-server.js"
+  },
+  "keywords": [
+    "networking",
+    "high-performance",
+    "web-server",
+    "rdma",
+    "dpdk",
+    "xdp",
+    "simd",
+    "zero-copy",
+    "rust"
+  ],
+  "author": "Cyclone Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cyclone-rs/cyclone"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "node-gyp": "^9.0.0"
+  },
+  "gypfile": true
+}

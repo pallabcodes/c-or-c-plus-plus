@@ -1,0 +1,176 @@
+---
+alwaysApply: false
+---
+
+# Behavioral Design Patterns Standards
+
+## Overview
+Behavioral patterns manage object communication and responsibility distribution. This document defines standards for implementing production grade behavioral design patterns.
+
+## Observer Pattern
+
+### Purpose
+* **Event notification**: Notify dependent objects of changes
+* **Loose coupling**: Decouple subject and observers
+* **One to many**: One subject, many observers
+* **Rationale**: Observer enables event driven architecture
+
+### Implementation
+* **Subject interface**: Define subject interface
+* **Observer interface**: Define observer interface
+* **Concrete subject**: Concrete subject implementation
+* **Concrete observers**: Concrete observer implementations
+* **Rationale**: Implementation enables loose coupling
+
+### Example Observer
+```cpp
+class Observer {
+public:
+    virtual ~Observer() = default;
+    virtual void update(const std::string& message) = 0;
+};
+
+class Subject {
+private:
+    std::vector<Observer*> observers_;
+
+public:
+    void attach(Observer* observer) {
+        observers_.push_back(observer);
+    }
+
+    void notify(const std::string& message) {
+        for (auto* observer : observers_) {
+            observer->update(message);
+        }
+    }
+};
+
+class ConcreteObserver : public Observer {
+public:
+    void update(const std::string& message) override {
+        // Handle update
+    }
+};
+```
+
+## Strategy Pattern
+
+### Purpose
+* **Algorithm selection**: Select algorithm at runtime
+* **Encapsulation**: Encapsulate algorithms
+* **Interchangeability**: Interchangeable algorithms
+* **Rationale**: Strategy enables algorithm flexibility
+
+### Implementation
+* **Strategy interface**: Define strategy interface
+* **Concrete strategies**: Concrete strategy implementations
+* **Context class**: Context class using strategy
+* **Rationale**: Implementation enables algorithm selection
+
+### Example Strategy
+```cpp
+class SortStrategy {
+public:
+    virtual ~SortStrategy() = default;
+    virtual void sort(std::vector<int>& data) = 0;
+};
+
+class QuickSort : public SortStrategy {
+public:
+    void sort(std::vector<int>& data) override {
+        // Quick sort implementation
+    }
+};
+
+class MergeSort : public SortStrategy {
+public:
+    void sort(std::vector<int>& data) override {
+        // Merge sort implementation
+    }
+};
+
+class Sorter {
+private:
+    SortStrategy* strategy_;
+
+public:
+    void setStrategy(SortStrategy* strategy) {
+        strategy_ = strategy;
+    }
+
+    void sort(std::vector<int>& data) {
+        strategy_->sort(data);
+    }
+};
+```
+
+## Command Pattern
+
+### Purpose
+* **Request encapsulation**: Encapsulate requests as objects
+* **Undo/redo**: Support undo/redo operations
+* **Queue requests**: Queue and execute requests
+* **Rationale**: Command enables request encapsulation
+
+### Implementation
+* **Command interface**: Define command interface
+* **Concrete commands**: Concrete command implementations
+* **Invoker**: Invoker class executing commands
+* **Receiver**: Receiver class performing actions
+* **Rationale**: Implementation enables request encapsulation
+
+## State Pattern
+
+### Purpose
+* **State based behavior**: Behavior depends on state
+* **State transitions**: Manage state transitions
+* **Encapsulation**: Encapsulate state specific behavior
+* **Rationale**: State enables state based behavior
+
+### Implementation
+* **State interface**: Define state interface
+* **Concrete states**: Concrete state implementations
+* **Context class**: Context class with state
+* **Rationale**: Implementation enables state management
+
+## Implementation Standards
+
+### Correctness
+* **Thread safety**: Ensure thread safety for observers
+* **State consistency**: Maintain state consistency
+* **Exception safety**: Maintain exception safety
+* **Rationale**: Correctness is critical
+
+### Performance
+* **Notification overhead**: Minimize observer notification overhead
+* **Strategy overhead**: Minimize strategy overhead
+* **Rationale**: Performance is critical
+
+## Testing Requirements
+
+### Unit Tests
+* **Observer**: Test observer notifications
+* **Strategy**: Test strategy selection
+* **Command**: Test command execution
+* **State**: Test state transitions
+* **Rationale**: Comprehensive testing ensures correctness
+
+## Research Papers and References
+
+### Behavioral Patterns
+* "Design Patterns: Elements of Reusable Object Oriented Software" (Gang of Four)
+* Behavioral pattern catalogs
+* Pattern implementation guides
+
+## Implementation Checklist
+
+- [ ] Understand observer pattern
+- [ ] Understand strategy pattern
+- [ ] Understand command pattern
+- [ ] Understand state pattern
+- [ ] Implement behavioral patterns
+- [ ] Add thread safety
+- [ ] Write comprehensive unit tests
+- [ ] Document pattern usage
+

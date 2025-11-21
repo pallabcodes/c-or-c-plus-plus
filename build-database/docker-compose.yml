@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  auroradb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./data:/app/data
+      - ./config:/app/config:ro
+    environment:
+      - RUST_LOG=info
+      - AURORADB_DATA_DIR=/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    restart: unless-stopped
+
+  # Optional: PostgreSQL for comparison/benchmarking
+  postgres:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: auroradb_bench
+      POSTGRES_USER: auroradb
+      POSTGRES_PASSWORD: auroradb123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_pgvector.sql:/docker-entrypoint-initdb.d/init_pgvector.sql
+    profiles:
+      - bench
+
+  # Optional: Redis for caching/session management
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    profiles:
+      - full
+
+volumes:
+  postgres_data:
+  redis_data:

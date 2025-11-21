@@ -1,0 +1,171 @@
+version: '3.8'
+
+services:
+  # =============================================================================
+  # AuroraDB Primary Node
+  # =============================================================================
+  aurora-primary:
+    build:
+      context: ../../..
+      dockerfile: deployment/docker/Dockerfile
+      target: runtime
+    container_name: aurora-primary
+    ports:
+      - "5432:5432"    # PostgreSQL-compatible port
+      - "8080:8080"    # HTTP API port
+      - "9090:9090"    # Metrics port
+    environment:
+      - AURORA_NODE_ID=primary-001
+      - AURORA_CLUSTER_MODE=single
+      - AURORA_DATA_DIR=/aurora/data
+      - AURORA_LOG_LEVEL=info
+      - AURORA_JIT_ENABLED=true
+      - AURORA_MAX_CONNECTIONS=100
+      - AURORA_BUFFER_POOL_SIZE=1GB
+    volumes:
+      - aurora_data:/aurora/data
+      - aurora_logs:/aurora/logs
+    networks:
+      - aurora-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9090/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: ["aurora-db", "--config", "/aurora/config/production.toml"]
+
+  # =============================================================================
+  # AuroraDB Replica Node (for testing replication)
+  # =============================================================================
+  aurora-replica:
+    build:
+      context: ../../..
+      dockerfile: deployment/docker/Dockerfile
+      target: runtime
+    container_name: aurora-replica
+    ports:
+      - "5433:5432"    # Different host port
+      - "8081:8080"
+      - "9091:9090"
+    environment:
+      - AURORA_NODE_ID=replica-001
+      - AURORA_CLUSTER_MODE=replica
+      - AURORA_PRIMARY_HOST=aurora-primary
+      - AURORA_DATA_DIR=/aurora/data
+      - AURORA_LOG_LEVEL=info
+      - AURORA_JIT_ENABLED=true
+      - AURORA_MAX_CONNECTIONS=50
+      - AURORA_BUFFER_POOL_SIZE=512MB
+    volumes:
+      - aurora_replica_data:/aurora/data
+      - aurora_replica_logs:/aurora/logs
+    networks:
+      - aurora-network
+    depends_on:
+      - aurora-primary
+    restart: unless-stopped
+    command: ["aurora-db", "--config", "/aurora/config/replica.toml"]
+
+  # =============================================================================
+  # Load Balancer (HAProxy)
+  # =============================================================================
+  aurora-lb:
+    image: haproxy:2.8-alpine
+    container_name: aurora-lb
+    ports:
+      - "5434:5432"    # Load balanced PostgreSQL port
+      - "8082:8080"    # Load balanced HTTP API
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    networks:
+      - aurora-network
+    depends_on:
+      - aurora-primary
+      - aurora-replica
+    restart: unless-stopped
+
+  # =============================================================================
+  # Monitoring Stack (Prometheus + Grafana)
+  # =============================================================================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: aurora-prometheus
+    ports:
+      - "9092:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - aurora-network
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: aurora-grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=aurora
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    networks:
+      - aurora-network
+    depends_on:
+      - prometheus
+    restart: unless-stopped
+
+  # =============================================================================
+  # Development Tools
+  # =============================================================================
+  aurora-cli:
+    build:
+      context: ../../..
+      dockerfile: deployment/docker/Dockerfile
+      target: debug
+    container_name: aurora-cli
+    profiles: ["dev"]
+    volumes:
+      - aurora_data:/aurora/data:ro
+      - aurora_logs:/aurora/logs:ro
+    networks:
+      - aurora-network
+    command: ["sleep", "infinity"]  # Keep container running for CLI access
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  aurora-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  aurora_data:
+    driver: local
+  aurora_logs:
+    driver: local
+  aurora_replica_data:
+    driver: local
+  aurora_replica_logs:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local

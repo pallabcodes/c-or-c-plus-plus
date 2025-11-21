@@ -1,0 +1,156 @@
+[package]
+name = "aurora-coordinator"
+version = "0.1.0"
+edition = "2021"
+description = "Aurora Coordinator: Research-Backed Distributed Systems Orchestration - UNIQUENESS in Action"
+authors = ["Aurora Team"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/aurora-db/aurora-coordinator"
+keywords = ["distributed-systems", "consensus", "coordination", "cluster", "orchestration"]
+categories = ["database-implementations", "concurrency", "network-programming"]
+readme = "README.md"
+
+[dependencies]
+# Core async runtime and futures
+futures = "0.3"
+tokio = { version = "1.0", features = ["rt", "net", "time", "sync", "rt-multi-thread"] }
+
+# Memory-safe networking primitives  
+mio = { version = "0.8", features = ["net", "os-poll"] }
+socket2 = "0.5"
+
+# Concurrent data structures (research-backed)
+crossbeam = "0.8"
+dashmap = "5.5"
+parking_lot = "0.12"
+
+# Serialization and communication
+serde = { version = "1.0", features = ["derive"] }
+bincode = "1.3"
+prost = "0.12"
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Async traits
+async-trait = "0.1"
+
+# Statistical computations
+statistical = "1.0"
+
+# Logging and observability (HDR histograms, structured logging)
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+
+# Configuration
+toml = "0.8"
+
+# Cryptography (for secure communication)
+rustls = { version = "0.21", optional = true }
+rustls-pemfile = { version = "1.0", optional = true }
+
+# Performance profiling
+flame = { version = "0.2", optional = true }
+tracing-flame = { version = "0.2", optional = true }
+
+# Cryptography
+ed25519-dalek = "2.0"
+blake3 = "1.5"
+rand = "0.8"
+
+# TLS/SSL
+rustls = { version = "0.21", features = ["dangerous_configuration"] }
+tokio-rustls = "0.24"
+
+# Cryptographic primitives
+ring = "0.17"
+
+# Serialization for audit logs
+serde_json = "1.0"
+
+# Web framework for REST API
+warp = "0.3"
+tokio = { version = "1.0", features = ["full"] }
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1.0", features = ["v4"] }
+
+# gRPC framework
+tonic = "0.9"
+prost = "0.11"
+
+# Async traits
+async-trait = "0.1"
+
+# TOML configuration
+toml = "0.8"
+
+# Linux kernel inspired components
+# io_uring for high-performance async I/O
+io-uring = { version = "0.6", optional = true }
+
+# SIMD acceleration for coordination operations
+packed_simd = { version = "0.3.7", optional = true }
+
+[dev-dependencies]
+# Testing framework
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1.0"
+
+# Async testing
+tokio-test = "0.4"
+
+# Benchmarking
+iai = "0.1"
+
+# Property testing
+proptest-derive = "0.3"
+
+[features]
+default = ["tokio-runtime"]
+tokio-runtime = ["tokio"]
+tls = ["rustls", "rustls-pemfile"]
+profiling = ["flame", "tracing-flame"]
+io-uring = ["dep:io-uring"]
+simd = ["packed_simd"]
+coordination-optimization = ["simd"]
+full-optimization = ["io-uring", "simd", "coordination-optimization", "tls", "profiling"]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+debug = true
+
+[profile.dev]
+opt-level = 0
+debug = true
+overflow-checks = true
+
+[workspace]
+members = [
+    "coordinator-core",
+    "coordinator-net", 
+    "coordinator-consensus",
+    "examples"
+]
+
+[[example]]
+name = "basic_coordination"
+path = "examples/basic_coordination.rs"
+
+[[example]]
+name = "aurora_cluster"
+path = "examples/aurora_cluster.rs"
+
+[[example]]
+name = "cyclone_integration"
+path = "examples/cyclone_integration.rs"
+
+# UNIQUENESS Validation: Research-Backed Dependencies
+# - mio: epoll/kqueue abstraction (I/O multiplexing research)
+# - crossbeam: Lock-free algorithms (Herlihy research)
+# - dashmap: Concurrent hash maps (memory-safe concurrency)
+# - tracing: Structured logging (research-backed observability)
+# - socket2: Advanced socket APIs (zero-copy networking)

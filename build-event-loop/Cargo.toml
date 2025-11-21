@@ -1,0 +1,149 @@
+[package]
+name = "cyclone"
+version = "0.1.0"
+edition = "2021"
+description = "Cyclone: Memory-Safe, Research-Backed Event Loop - UNIQUENESS in Action"
+authors = ["Cyclone Team"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/cyclone-rs/cyclone"
+keywords = ["event-loop", "async", "networking", "memory-safe", "high-performance"]
+categories = ["asynchronous", "network-programming", "concurrency"]
+readme = "README.md"
+
+[dependencies]
+# Core async runtime and futures
+futures = "0.3"
+tokio = { version = "1.0", features = ["rt", "net", "time", "sync"], optional = true }
+
+# Memory-safe networking primitives
+mio = { version = "0.8", features = ["net", "os-poll"] }
+socket2 = "0.5"
+
+# Concurrent data structures (research-backed)
+crossbeam = "0.8"
+dashmap = "5.5"
+
+# Timer implementations (hierarchical wheels)
+slotmap = "1.0"
+
+# Zero-copy I/O and memory management
+bytes = "1.5"
+
+# io_uring for high-performance async I/O
+io-uring = { version = "0.6", optional = true }
+
+# SIMD acceleration
+packed_simd = { version = "0.3.7", optional = true }
+simd-json = { version = "0.9", optional = true }
+
+# Error handling
+thiserror = "1.0"
+anyhow = "1.0"
+
+# Logging and observability (HDR histograms, structured logging)
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Configuration
+serde = { version = "1.0", features = ["derive"] }
+toml = "0.8"
+
+# Cryptography (for TLS support)
+rustls = { version = "0.21", optional = true }
+rustls-pemfile = { version = "1.0", optional = true }
+webpki-roots = { version = "0.25", optional = true }
+
+# Performance profiling
+flame = { version = "0.2", optional = true }
+tracing-flame = { version = "0.2", optional = true }
+
+[dev-dependencies]
+# Testing framework
+criterion = { version = "0.5", features = ["html_reports"] }
+proptest = "1.0"
+
+# Async testing
+tokio-test = "0.4"
+
+# Benchmarking
+iai = "0.1"
+
+# Property testing
+proptest = "1.0"
+proptest-derive = "0.3"
+
+# Fuzz testing
+libfuzzer-sys = { version = "0.4", optional = true }
+
+# Property testing
+proptest = "1.0"
+
+# Examples dependencies
+ctrlc = "3.4"
+
+[features]
+default = ["tokio-runtime"]
+tokio-runtime = ["tokio"]
+tls = ["rustls", "rustls-pemfile", "webpki-roots"]
+profiling = ["flame", "tracing-flame"]
+fuzzing = ["libfuzzer-sys"]
+io-uring = ["dep:io-uring"]
+simd = ["packed_simd", "simd-json"]
+network-optimization = ["simd"]
+full-optimization = ["io-uring", "simd", "network-optimization", "tls", "profiling"]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+debug = true
+
+[profile.dev]
+opt-level = 0
+debug = true
+overflow-checks = true
+
+[workspace]
+members = [
+    "cyclone-core",
+    "cyclone-net",
+    "cyclone-timer",
+    "cyclone-scheduler",
+    "examples"
+]
+
+[[example]]
+name = "basic"
+path = "examples/basic.rs"
+
+[[example]]
+name = "tcp_server"
+path = "examples/tcp_server.rs"
+
+[[example]]
+name = "network_benchmark"
+path = "examples/network_benchmark.rs"
+
+[[example]]
+name = "iouring_demo"
+path = "examples/iouring_demo.rs"
+
+[[example]]
+name = "numa_scheduler_demo"
+path = "examples/numa_scheduler_demo.rs"
+
+[[example]]
+name = "simd_demo"
+path = "examples/simd_demo.rs"
+
+[[example]]
+name = "advanced_optimization_demo"
+path = "examples/advanced_optimization_demo.rs"
+
+# UNIQUENESS Validation: Research-Backed Dependencies
+# - mio: epoll/kqueue abstraction (I/O multiplexing research)
+# - crossbeam: Lock-free algorithms (Herlihy research)
+# - dashmap: Concurrent hash maps (memory-safe concurrency)
+# - socket2: Advanced socket APIs (zero-copy networking)
+# - tracing: Structured logging (research-backed observability)

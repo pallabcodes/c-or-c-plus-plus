@@ -1,0 +1,94 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: cyclone-service
+  labels:
+    app: cyclone
+spec:
+  type: LoadBalancer
+  ports:
+  - name: http
+    port: 80
+    targetPort: 8080
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 8443
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app: cyclone
+    component: event-loop
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cyclone-metrics
+  labels:
+    app: cyclone
+    component: metrics
+spec:
+  type: ClusterIP
+  ports:
+  - name: prometheus
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app: cyclone
+    component: event-loop
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cyclone-config
+data:
+  config.toml: |
+    [server]
+    bind_address = "0.0.0.0"
+    port = 8080
+    max_connections = 100000
+    connection_timeout_seconds = 300
+    worker_threads = 0
+
+    [network]
+    enable_zero_copy = true
+    enable_connection_pooling = true
+    connection_pool_size = 10000
+    enable_syscall_batching = true
+    syscall_batch_size = 128
+
+    [timer]
+    wheel_size = 2048
+    levels = 8
+    tick_duration_ms = 1
+    max_timers = 1000000
+
+    [metrics]
+    enabled = true
+    collection_interval_seconds = 15
+    prometheus_export = true
+    prometheus_port = 9090
+
+    [circuit_breaker]
+    enabled = true
+    failure_threshold = 10
+    success_threshold = 5
+    timeout_seconds = 300
+
+    [tls]
+    enabled = false
+    cert_file = "/etc/ssl/certs/cyclone.crt"
+    key_file = "/etc/ssl/private/cyclone.key"
+    client_auth = false
+
+    [observability]
+    structured_logging = true
+    log_level = "INFO"
+    request_tracing = true
+    tracing_sample_rate = 0.1

@@ -1,0 +1,261 @@
+# Algorithm Implementation Standards
+
+## Array and String Algorithms
+
+### Sorting Algorithms
+
+#### Merge Sort
+* **Complexity**: O(n log n) time, O(n) space
+* **Stability**: Stable sort
+* **Applications**: General purpose sorting, external sorting
+* **Implementation**: Divide and conquer, merge two sorted arrays
+
+#### Quick Sort
+* **Complexity**: O(n log n) average, O(n^2) worst case, O(log n) space
+* **Stability**: Not stable
+* **Applications**: General purpose sorting, in place sorting
+* **Implementation**: Partition based, pivot selection
+
+#### Heap Sort
+* **Complexity**: O(n log n) time, O(1) space
+* **Stability**: Not stable
+* **Applications**: In place sorting, priority queues
+* **Implementation**: Build heap, extract maximum
+
+#### Radix Sort
+* **Complexity**: O(d * n) where d is number of digits
+* **Stability**: Stable sort
+* **Applications**: Integer sorting, string sorting
+* **Implementation**: Sort by each digit
+
+### Searching Algorithms
+
+#### Binary Search
+* **Complexity**: O(log n) time, O(1) space
+* **Precondition**: Array must be sorted
+* **Applications**: Search in sorted arrays, find insertion point
+* **Implementation**: Divide search space in half
+
+#### Linear Search
+* **Complexity**: O(n) time, O(1) space
+* **Precondition**: None
+* **Applications**: Unsorted arrays, small arrays
+* **Implementation**: Check each element sequentially
+
+#### Interpolation Search
+* **Complexity**: O(log log n) average, O(n) worst case
+* **Precondition**: Uniformly distributed sorted array
+* **Applications**: Uniformly distributed data
+* **Implementation**: Estimate position based on value distribution
+
+### Sliding Window Algorithms
+
+#### Fixed Size Window
+* **Applications**: Maximum subarray sum of size k, average of subarrays
+* **Complexity**: O(n) time, O(1) space
+* **Implementation**: Maintain window sum, slide window
+
+#### Variable Size Window
+* **Applications**: Minimum window substring, longest substring with k distinct
+* **Complexity**: O(n) time, O(k) space where k is distinct characters
+* **Implementation**: Expand and shrink window based on condition
+
+### Two Pointers Algorithms
+
+#### Pair with Target Sum
+* **Complexity**: O(n) time, O(1) space
+* **Precondition**: Array must be sorted
+* **Applications**: Find pairs with target sum
+* **Implementation**: Two pointers from start and end
+
+#### Trapping Rainwater
+* **Complexity**: O(n) time, O(1) space
+* **Applications**: Water trapping problems
+* **Implementation**: Two pointers with max tracking
+
+### String Matching Algorithms
+
+#### KMP Algorithm
+* **Complexity**: O(n + m) time, O(m) space where m is pattern length
+* **Applications**: Pattern matching, string search
+* **Implementation**: Build failure function, match with failure function
+
+#### Rabin Karp Algorithm
+* **Complexity**: O(n + m) average, O(n * m) worst case
+* **Applications**: Pattern matching, multiple pattern search
+* **Implementation**: Rolling hash, hash comparison
+
+#### Longest Palindromic Substring
+* **Complexity**: O(n^2) time, O(1) space (expand around centers)
+* **Applications**: Palindrome detection, string analysis
+* **Implementation**: Expand around each center
+
+## Graph Algorithms
+
+### Graph Representation
+
+#### Adjacency List
+* **Structure**: List of neighbors for each vertex
+* **Space**: O(V + E) where V is vertices, E is edges
+* **Applications**: Sparse graphs, general purpose
+
+#### Adjacency Matrix
+* **Structure**: Matrix representation
+* **Space**: O(V^2)
+* **Applications**: Dense graphs, constant time edge queries
+
+### Graph Traversal
+
+#### Breadth First Search (BFS)
+* **Complexity**: O(V + E) time, O(V) space
+* **Applications**: Shortest path in unweighted graphs, level order traversal
+* **Implementation**: Queue based, level by level traversal
+
+#### Depth First Search (DFS)
+* **Complexity**: O(V + E) time, O(V) space
+* **Applications**: Cycle detection, topological sort, connected components
+* **Implementation**: Recursive or stack based
+
+### Shortest Path Algorithms
+
+#### Dijkstra's Algorithm
+* **Complexity**: O((V + E) log V) with binary heap, O(V^2) with array
+* **Applications**: Single source shortest path in weighted graphs (non negative weights)
+* **Implementation**: Priority queue, greedy approach
+
+#### Bellman Ford Algorithm
+* **Complexity**: O(V * E) time, O(V) space
+* **Applications**: Single source shortest path, negative weight detection
+* **Implementation**: Relax edges V - 1 times
+
+#### Floyd Warshall Algorithm
+* **Complexity**: O(V^3) time, O(V^2) space
+* **Applications**: All pairs shortest path
+* **Implementation**: Dynamic programming, intermediate vertices
+
+### Minimum Spanning Tree (MST)
+
+#### Kruskal's Algorithm
+* **Complexity**: O(E log E) time, O(V) space
+* **Applications**: Minimum spanning tree
+* **Implementation**: Sort edges, union find for cycle detection
+
+#### Prim's Algorithm
+* **Complexity**: O((V + E) log V) with binary heap
+* **Applications**: Minimum spanning tree
+* **Implementation**: Priority queue, greedy approach
+
+### Topological Sort
+
+#### DFS Based Topological Sort
+* **Complexity**: O(V + E) time, O(V) space
+* **Applications**: Dependency resolution, course scheduling
+* **Implementation**: DFS with finish time tracking
+
+#### Kahn's Algorithm (BFS Based)
+* **Complexity**: O(V + E) time, O(V) space
+* **Applications**: Dependency resolution, course scheduling
+* **Implementation**: BFS starting from nodes with zero in degree
+
+### Union Find (Disjoint Set)
+
+#### Path Compression
+* **Complexity**: O(α(n)) amortized where α is inverse Ackermann
+* **Applications**: Cycle detection, connected components
+* **Implementation**: Path compression and union by rank
+
+## Dynamic Programming
+
+### DP Patterns
+
+#### 1D DP
+* **Structure**: Single dimension state
+* **Examples**: Fibonacci, climbing stairs, house robber
+* **Complexity**: O(n) time, O(n) space (can optimize to O(1))
+
+#### 2D DP
+* **Structure**: Two dimension state
+* **Examples**: Longest common subsequence, edit distance, knapsack
+* **Complexity**: O(n * m) time, O(n * m) space
+
+#### Multi Dimensional DP
+* **Structure**: Multiple dimensions
+* **Examples**: 3D DP for complex problems
+* **Complexity**: Depends on dimensions
+
+### Common DP Problems
+
+#### Knapsack Problems
+* **0/1 Knapsack**: Each item can be used at most once
+* **Unbounded Knapsack**: Each item can be used multiple times
+* **Fractional Knapsack**: Greedy (not DP)
+* **Complexity**: O(n * W) where W is capacity
+
+#### Longest Common Subsequence (LCS)
+* **Complexity**: O(n * m) time, O(n * m) space
+* **Optimization**: Can optimize to O(min(n, m)) space
+* **Applications**: String comparison, diff algorithms
+
+#### Edit Distance
+* **Complexity**: O(n * m) time, O(n * m) space
+* **Optimization**: Can optimize to O(min(n, m)) space
+* **Applications**: String similarity, spell checking
+
+#### Longest Increasing Subsequence (LIS)
+* **Complexity**: O(n^2) DP, O(n log n) with binary search
+* **Applications**: Sequence analysis, scheduling
+
+### DP Optimization Techniques
+
+#### Space Optimization
+* **Rolling arrays**: Use rolling arrays to reduce space
+* **State compression**: Compress state representation
+
+#### State Transition Optimization
+* **Monotonic queue**: Optimize state transitions
+* **Convex hull trick**: Optimize certain DP transitions
+
+### Memoization vs Tabulation
+
+#### Memoization (Top Down)
+* **Approach**: Recursive with memoization
+* **Advantages**: Natural problem structure, lazy evaluation
+* **Disadvantages**: Recursion overhead, stack space
+
+#### Tabulation (Bottom Up)
+* **Approach**: Iterative, fill table bottom up
+* **Advantages**: No recursion overhead, better cache locality
+* **Disadvantages**: May compute unnecessary states
+
+### Bitmasking DP
+
+#### Subset DP
+* **Applications**: Traveling salesman, subset problems
+* **Complexity**: O(2^n * n) for TSP
+* **Implementation**: Use bitmasks to represent subsets
+
+## Implementation Standards
+
+### Correctness
+* **Invariants**: Document and maintain invariants
+* **Edge cases**: Handle edge cases correctly
+* **Preconditions**: Validate preconditions
+* **Rationale**: Correctness is critical
+
+### Performance
+* **Complexity**: Achieve stated complexity bounds
+* **Optimization**: Optimize hot paths
+* **Benchmarking**: Benchmark against alternatives
+* **Rationale**: Performance is critical
+
+## Testing Requirements
+
+### Unit Tests
+* **Operations**: Test all algorithm operations
+* **Edge cases**: Test boundary conditions
+* **Preconditions**: Test precondition validation
+
+### Property Based Tests
+* **Invariants**: Test invariants hold for random inputs
+* **Fuzzing**: Fuzz algorithms with random inputs
+* **Stress tests**: Test with large datasets

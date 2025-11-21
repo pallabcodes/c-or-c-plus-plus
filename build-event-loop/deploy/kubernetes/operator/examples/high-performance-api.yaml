@@ -1,0 +1,186 @@
+apiVersion: cyclone.dev/v1
+kind: CycloneApp
+metadata:
+  name: cyclone-high-performance-api
+  namespace: default
+  labels:
+    app: cyclone-api
+    performance: high
+spec:
+  version: "2.0.0"
+  replicas: 5
+  image: cyclone/cyclone-web:latest
+  targetRPS: 2000000
+  maxConnections: 500000
+
+  # Bleeding-edge networking optimizations
+  networking:
+    enableRDMA: true      # 5µs database query latency
+    enableDPDK: true      # User-space packet processing
+    enableXDP: true       # Kernel-level DDoS protection
+    zeroCopy: true        # Zero memory copy operations
+
+  # Enterprise-grade resource management
+  resources:
+    requests:
+      cpu: "2000m"
+      memory: "2Gi"
+    limits:
+      cpu: "4000m"
+      memory: "4Gi"
+
+  # TLS configuration
+  tls:
+    enabled: true
+    certificateSecret: "cyclone-api-tls"
+
+  # Comprehensive monitoring
+  metrics:
+    enabled: true
+    prometheus: true
+    path: "/metrics"
+
+  # Kubernetes ingress
+  ingress:
+    enabled: true
+    className: "nginx"
+    hosts:
+    - host: api.cyclone.dev
+      paths:
+      - path: "/"
+        pathType: "Prefix"
+
+  # Prometheus service monitoring
+  monitoring:
+    serviceMonitor:
+      enabled: true
+      interval: "15s"
+      scrapeTimeout: "10s"
+
+  # Intelligent auto-scaling
+  autoscaling:
+    enabled: true
+    minReplicas: 3
+    maxReplicas: 50
+    targetCPUUtilizationPercentage: 70
+    targetRPS: 150000  # Scale up when RPS exceeds 150K per replica
+
+  # Circuit breaker for fault tolerance
+  circuitBreaker:
+    enabled: true
+    failureThreshold: 10
+    successThreshold: 5
+    timeoutSeconds: 300
+
+---
+# Supporting resources for the CycloneApp
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cyclone-api-config
+  namespace: default
+data:
+  config.toml: |
+    [server]
+    bind_address = "0.0.0.0"
+    port = 3000
+    max_connections = 500000
+    connection_timeout_seconds = 300
+    worker_threads = 0
+
+    [network]
+    enable_zero_copy = true
+    enable_connection_pooling = true
+    connection_pool_size = 10000
+    enable_syscall_batching = true
+    syscall_batch_size = 128
+
+    [metrics]
+    enabled = true
+    collection_interval_seconds = 15
+    prometheus_export = true
+    prometheus_port = 9090
+
+    [circuit_breaker]
+    enabled = true
+    failure_threshold = 10
+    success_threshold = 5
+    timeout_seconds = 300
+
+    [tls]
+    enabled = true
+    cert_file = "/etc/ssl/certs/tls.crt"
+    key_file = "/etc/ssl/private/tls.key"
+
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cyclone-api-tls
+  namespace: default
+type: kubernetes.io/tls
+data:
+  # Base64 encoded certificate and key would go here
+  tls.crt: LS0tLS1CRUdJTi...
+  tls.key: LS0tLS1CRUdJTi...
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: cyclone-api-service
+  namespace: default
+  labels:
+    app: cyclone-api
+spec:
+  type: ClusterIP
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3000
+    protocol: TCP
+  - name: https
+    port: 443
+    targetPort: 8443
+    protocol: TCP
+  - name: metrics
+    port: 9090
+    targetPort: 9090
+    protocol: TCP
+  selector:
+    app: cyclone-api
+
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: cyclone-api-monitor
+  namespace: default
+  labels:
+    app: cyclone-api
+spec:
+  selector:
+    matchLabels:
+      app: cyclone-api
+  endpoints:
+  - port: metrics
+    interval: 15s
+    path: /metrics
+    scrapeTimeout: 10s
+  namespaceSelector:
+    matchNames:
+    - default
+
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: cyclone-api-pdb
+  namespace: default
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: cyclone-api

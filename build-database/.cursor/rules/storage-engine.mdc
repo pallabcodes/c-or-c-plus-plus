@@ -1,0 +1,87 @@
+---
+alwaysApply: false
+---
+
+# Storage Engine Standards
+
+## Scope
+Applies to all storage engine code. Extends repository root rules and code quality standards.
+
+## Storage Engine Types
+
+### B+ Tree Storage
+* Classic B+ tree implementation for row oriented storage
+* Write optimized B+ tree variants (e.g., Bw Tree for modern hardware)
+* Page layout with fixed size pages (typically 4KB or 8KB)
+* Slotted page layout for variable length records
+* Reference: "Efficient Locking for Concurrent Operations on B-Trees" (Lehman & Yao, 1981)
+* Reference: "The Bw-Tree" (Levandoski et al., 2013)
+* Reference: "Modern B-Tree Techniques" (Graefe, 2011)
+
+### LSM Tree Storage
+* Log structured merge tree implementation
+* Multi level compaction strategies
+* Write amplification optimization
+* Bloom filters for membership testing
+* Reference: "The Log-Structured Merge-Tree" (O'Neil et al., 1996)
+* Reference: "WiscKey: Separating Keys from Values in SSD-conscious Storage" (Lu et al., 2016)
+* Follow LevelDB and RocksDB architectural patterns
+
+### Columnar Storage
+* Column oriented layout for analytical workloads
+* Columnar compression (run length encoding, delta encoding, dictionary encoding)
+* Materialization strategies for query execution
+* Reference: "Integrating Compression and Execution in Column-Oriented Database Systems" (Abadi et al., 2006)
+* Optimize for sequential scans and vectorized operations
+
+### Hybrid Storage
+* PAX layout for cache efficiency
+* NSM row storage for transactional workloads
+* Adaptive storage format selection
+* Support both row and column oriented access patterns
+
+## Page Management
+
+### Page Layout
+* Fixed size pages with metadata headers
+* Free space tracking
+* Slot directory for variable length records
+* Page checksums for corruption detection
+* Page versioning for MVCC support
+
+### Memory Mapping
+* Memory mapped file I/O where appropriate
+* Direct I/O for write intensive workloads
+* mmap with MAP_SHARED for lifecycle management
+* Handle page faults gracefully
+
+## Write Ahead Logging
+
+### WAL Design
+* Append only log structure
+* Group commit optimization
+* Log sequence numbers (LSN) for ordering
+* Log compression for efficiency
+* Reference: ARIES Recovery Algorithm (Mohan et al., 1992)
+
+### Log Formats
+* Physical logging for durability
+* Logical logging for replication
+* Hybrid logging strategies
+* Minimal logging for bulk operations
+
+## Implementation Requirements
+* All file operations must check return values
+* Proper error handling and error propagation
+* Resource cleanup on all code paths
+* Page locking and synchronization where needed
+* Cache aware data structures
+* NUMA awareness for multi socket systems
+
+## Performance Considerations
+* Minimize I/O operations through buffering
+* Batch writes when possible
+* Use O_DIRECT for database files on modern systems
+* Optimize for SSD characteristics (write endurance, random access)
+* Profile page access patterns
+
