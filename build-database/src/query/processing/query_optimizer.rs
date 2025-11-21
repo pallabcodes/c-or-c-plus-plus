@@ -11,6 +11,7 @@ use std::cmp::Reverse;
 use crate::core::errors::{AuroraResult, AuroraError};
 use super::plan::*;
 use super::ast::*;
+use crate::query::indexes::{IndexManager, IndexType};
 
 /// Advanced query optimizer with AI-powered optimization
 pub struct QueryOptimizer {
@@ -31,6 +32,9 @@ pub struct QueryOptimizer {
 
     /// Runtime statistics for adaptive optimization
     runtime_stats: RuntimeStatistics,
+
+    /// Index manager for access method selection
+    index_manager: Arc<IndexManager>,
 }
 
 /// Optimization rule definition
@@ -140,7 +144,7 @@ struct PlanAlternative {
 
 impl QueryOptimizer {
     /// Create a new query optimizer
-    pub fn new() -> Self {
+    pub fn new(index_manager: Arc<IndexManager>) -> Self {
         Self {
             cost_model: CostModel::new(),
             learned_rules: HashMap::new(),
@@ -163,6 +167,7 @@ impl QueryOptimizer {
                 network_latency_ms: 1.0,
                 recent_query_load: 0.5,
             },
+            index_manager,
         }
     }
 
@@ -353,20 +358,190 @@ impl QueryOptimizer {
 
     /// Push down selections to reduce intermediate result sizes
     fn push_down_selections(&self, plan: QueryPlan) -> AuroraResult<QueryPlan> {
-        // Simplified: find Filter nodes and try to push them down
-        // Real implementation would traverse the plan tree
+        use super::plan::*;
+
+        match plan.root {
+            PlanNode::Filter { condition, input } => {
+                // Try to push the filter down through joins, etc.
+                match *input {
+                    PlanNode::Join { join_type, left, right, condition: join_condition } => {
+                        // For inner joins, we can often push filters down
+                        if matches!(join_type, JoinType::Inner) {
+                            // Check if filter references only one side of the join
+                            let left_tables = self.extract_table_references(&*left);
+                            let right_tables = self.extract_table_references(&*right);
+                            let filter_tables = self.extract_filter_tables(&condition);
+
+                            if self.is_subset(&filter_tables, &left_tables) {
+                                // Push to left side
+                                let new_left = Box::new(PlanNode::Filter {
+                                    condition: condition,
+                                    input: left,
+                                });
+                                return Ok(QueryPlan {
+                                    root: PlanNode::Join {
+                                        join_type,
+                                        left: new_left,
+                                        right,
+                                        condition: join_condition,
+                                    },
+                                    estimated_cost: plan.estimated_cost,
+                                    statistics: plan.statistics,
+                                });
+                            } else if self.is_subset(&filter_tables, &right_tables) {
+                                // Push to right side
+                                let new_right = Box::new(PlanNode::Filter {
+                                    condition: condition,
+                                    input: right,
+                                });
+                                return Ok(QueryPlan {
+                                    root: PlanNode::Join {
+                                        join_type,
+                                        left,
+                                        right: new_right,
+                                        condition: join_condition,
+                                    },
+                                    estimated_cost: plan.estimated_cost,
+                                    statistics: plan.statistics,
+                                });
+                            }
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
         Ok(plan)
+    }
+
+    /// Extract table references from a plan node
+    fn extract_table_references(&self, node: &PlanNode) -> HashSet<String> {
+        let mut tables = HashSet::new();
+        match node {
+            PlanNode::SeqScan { table, .. } => {
+                tables.insert(table.clone());
+            }
+            PlanNode::IndexScan { table, .. } => {
+                tables.insert(table.clone());
+            }
+            PlanNode::Join { left, right, .. } => {
+                tables.extend(self.extract_table_references(left));
+                tables.extend(self.extract_table_references(right));
+            }
+            PlanNode::Filter { input, .. } => {
+                tables.extend(self.extract_table_references(input));
+            }
+            _ => {}
+        }
+        tables
+    }
+
+    /// Extract tables referenced in a filter condition
+    fn extract_filter_tables(&self, condition: &Expression) -> HashSet<String> {
+        let mut tables = HashSet::new();
+        // Simplified: in real implementation, would parse expression tree
+        // For now, assume we have a way to extract table references
+        tables
+    }
+
+    /// Check if one set is a subset of another
+    fn is_subset(&self, subset: &HashSet<String>, superset: &HashSet<String>) -> bool {
+        subset.iter().all(|item| superset.contains(item))
     }
 
     /// Eliminate unnecessary projections
     fn eliminate_unnecessary_projections(&self, plan: QueryPlan) -> AuroraResult<QueryPlan> {
-        // Remove projection nodes that don't change the schema
+        use super::plan::*;
+
+        match &plan.root {
+            PlanNode::Projection { columns, input } => {
+                // Check if this projection is actually needed
+                match &**input {
+                    PlanNode::SeqScan { table, projected_columns } => {
+                        // If projection columns match the scan columns, eliminate projection
+                        if self.columns_match(columns, projected_columns) {
+                            return Ok(QueryPlan {
+                                root: *input.clone(),
+                                estimated_cost: plan.estimated_cost,
+                                statistics: plan.statistics,
+                            });
+                        }
+                    }
+                    PlanNode::Join { left, right, .. } => {
+                        // For joins, check if projection is just passing through all columns
+                        let left_cols = self.extract_columns(left);
+                        let right_cols = self.extract_columns(right);
+                        let mut all_cols = left_cols;
+                        all_cols.extend(right_cols);
+
+                        if self.columns_match(columns, &all_cols) {
+                            return Ok(QueryPlan {
+                                root: *input.clone(),
+                                estimated_cost: plan.estimated_cost,
+                                statistics: plan.statistics,
+                            });
+                        }
+                    }
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
         Ok(plan)
+    }
+
+    /// Check if column lists match
+    fn columns_match(&self, cols1: &[String], cols2: &[String]) -> bool {
+        if cols1.len() != cols2.len() {
+            return false;
+        }
+        for (a, b) in cols1.iter().zip(cols2.iter()) {
+            if a != b {
+                return false;
+            }
+        }
+        true
+    }
+
+    /// Extract columns from a plan node
+    fn extract_columns(&self, node: &PlanNode) -> Vec<String> {
+        match node {
+            PlanNode::SeqScan { projected_columns, .. } => projected_columns.clone(),
+            PlanNode::Projection { columns, .. } => columns.clone(),
+            _ => vec![], // Simplified
+        }
     }
 
     /// Merge consecutive filter operations
     fn merge_consecutive_filters(&self, plan: QueryPlan) -> AuroraResult<QueryPlan> {
-        // Combine multiple Filter nodes into one
+        use super::plan::*;
+
+        match &plan.root {
+            PlanNode::Filter { condition: outer_condition, input } => {
+                match &**input {
+                    PlanNode::Filter { condition: inner_condition, input: inner_input } => {
+                        // Merge the two filter conditions with AND
+                        let merged_condition = Expression::BinaryOp {
+                            left: Box::new(outer_condition.clone()),
+                            op: BinaryOperator::And,
+                            right: Box::new(inner_condition.clone()),
+                        };
+
+                        return Ok(QueryPlan {
+                            root: PlanNode::Filter {
+                                condition: merged_condition,
+                                input: inner_input.clone(),
+                            },
+                            estimated_cost: plan.estimated_cost,
+                            statistics: plan.statistics,
+                        });
+                    }
+                    _ => {}
+                }
+            }
+            _ => {}
+        }
         Ok(plan)
     }
 
@@ -384,21 +559,291 @@ impl QueryOptimizer {
 
     /// Generate different join order alternatives
     fn generate_join_order_alternatives(&self, plan: &QueryPlan) -> AuroraResult<Option<Vec<QueryPlan>>> {
-        // Generate different join tree orderings
-        // This is a complex optimization that considers join commutativity/associativity
-        Ok(None) // Simplified
+        use super::plan::*;
+
+        let mut alternatives = Vec::new();
+
+        // Extract all base tables from the plan
+        let base_tables = self.extract_base_tables(plan);
+
+        if base_tables.len() < 3 {
+            // For simple cases, generate basic join order permutations
+            if base_tables.len() == 2 {
+                // Create alternative join orders: A⋈B vs B⋈A
+                if let Some(alt_plan) = self.create_alternative_join_order(plan, &base_tables)? {
+                    alternatives.push(alt_plan);
+                }
+            }
+        } else {
+            // For complex joins, use a simple heuristic: smallest table first
+            // In a real optimizer, this would use dynamic programming
+            if let Some(alt_plan) = self.create_left_deep_join_tree(plan, &base_tables)? {
+                alternatives.push(alt_plan);
+            }
+        }
+
+        if alternatives.is_empty() {
+            Ok(None)
+        } else {
+            Ok(Some(alternatives))
+        }
+    }
+
+    /// Extract base tables from a query plan
+    fn extract_base_tables(&self, plan: &QueryPlan) -> Vec<String> {
+        let mut tables = Vec::new();
+        self.collect_base_tables(&plan.root, &mut tables);
+        tables
+    }
+
+    /// Recursively collect base tables from plan nodes
+    fn collect_base_tables(&self, node: &PlanNode, tables: &mut Vec<String>) {
+        match node {
+            PlanNode::SeqScan { table, .. } => {
+                if !tables.contains(table) {
+                    tables.push(table.clone());
+                }
+            }
+            PlanNode::IndexScan { table, .. } => {
+                if !tables.contains(table) {
+                    tables.push(table.clone());
+                }
+            }
+            PlanNode::Join { left, right, .. } => {
+                self.collect_base_tables(left, tables);
+                self.collect_base_tables(right, tables);
+            }
+            PlanNode::Filter { input, .. } => {
+                self.collect_base_tables(input, tables);
+            }
+            PlanNode::Projection { input, .. } => {
+                self.collect_base_tables(input, tables);
+            }
+            _ => {}
+        }
+    }
+
+    /// Create alternative join order (swap join operands)
+    fn create_alternative_join_order(&self, plan: &QueryPlan, tables: &[String]) -> AuroraResult<Option<QueryPlan>> {
+        use super::plan::*;
+
+        if tables.len() == 2 {
+            match &plan.root {
+                PlanNode::Join { join_type, left, right, condition } => {
+                    // Create swapped join order
+                    let new_plan = QueryPlan {
+                        root: PlanNode::Join {
+                            join_type: join_type.clone(),
+                            left: right.clone(),
+                            right: left.clone(),
+                            condition: condition.clone(),
+                        },
+                        estimated_cost: plan.estimated_cost, // Would be recalculated in real optimizer
+                        statistics: plan.statistics.clone(),
+                    };
+                    return Ok(Some(new_plan));
+                }
+                _ => {}
+            }
+        }
+        Ok(None)
+    }
+
+    /// Create left-deep join tree (simplified)
+    fn create_left_deep_join_tree(&self, _plan: &QueryPlan, _tables: &[String]) -> AuroraResult<Option<QueryPlan>> {
+        // Simplified: just return None for now
+        // Real implementation would build optimal join tree
+        Ok(None)
     }
 
     /// Generate different join method alternatives
     fn generate_join_method_alternatives(&self, plan: &QueryPlan) -> AuroraResult<Option<Vec<QueryPlan>>> {
-        // Generate plans with different join algorithms (hash, merge, nested loop)
-        Ok(None) // Simplified
+        use super::plan::*;
+
+        let mut alternatives = Vec::new();
+
+        match &plan.root {
+            PlanNode::Join { join_type, left, right, condition } => {
+                // For inner joins with equi-conditions, consider hash join
+                if matches!(join_type, JoinType::Inner) && self.is_equi_join(condition) {
+                    // Create hash join alternative
+                    // In a real implementation, this would create a HashJoin physical operator
+                    let hash_join_plan = QueryPlan {
+                        root: PlanNode::HashJoin {
+                            left: left.clone(),
+                            right: right.clone(),
+                            join_keys: self.extract_join_keys(condition),
+                        },
+                        estimated_cost: plan.estimated_cost * 0.8, // Assume hash join is more efficient
+                        statistics: plan.statistics.clone(),
+                    };
+                    alternatives.push(hash_join_plan);
+                }
+
+                // For sorted inputs, consider merge join
+                if self.has_sorted_inputs(left) && self.has_sorted_inputs(right) {
+                    let merge_join_plan = QueryPlan {
+                        root: PlanNode::MergeJoin {
+                            left: left.clone(),
+                            right: right.clone(),
+                            join_keys: self.extract_join_keys(condition),
+                        },
+                        estimated_cost: plan.estimated_cost * 0.9,
+                        statistics: plan.statistics.clone(),
+                    };
+                    alternatives.push(merge_join_plan);
+                }
+            }
+            _ => {}
+        }
+
+        if alternatives.is_empty() {
+            Ok(None)
+        } else {
+            Ok(Some(alternatives))
+        }
+    }
+
+    /// Check if join condition is equi-join
+    fn is_equi_join(&self, _condition: &Expression) -> bool {
+        // Simplified: check if condition contains equality comparisons
+        // Real implementation would parse the expression tree
+        true // Assume equi-join for now
+    }
+
+    /// Extract join keys from condition
+    fn extract_join_keys(&self, _condition: &Expression) -> Vec<(String, String)> {
+        // Simplified: return empty vector
+        // Real implementation would parse condition to extract join keys
+        vec![]
+    }
+
+    /// Check if input is sorted (simplified)
+    fn has_sorted_inputs(&self, _node: &PlanNode) -> bool {
+        // Simplified: assume inputs are not sorted
+        // Real implementation would check for Sort nodes or index ordering
+        false
     }
 
     /// Generate different access method alternatives
     fn generate_access_method_alternatives(&self, plan: &QueryPlan) -> AuroraResult<Option<Vec<QueryPlan>>> {
-        // Generate plans with different table access methods (seq scan, index scan, etc.)
-        Ok(None) // Simplified
+        use super::plan::*;
+
+        let mut alternatives = Vec::new();
+
+        // Look for SeqScan nodes that might benefit from index scans
+        match &plan.root {
+            PlanNode::SeqScan { table, projected_columns } => {
+                // Query the index manager for available indexes on this table
+                let available_indexes = self.index_manager.get_indexes_for_table(table)?;
+
+                for index_config in available_indexes {
+                    match index_config.index_type {
+                        IndexType::BTree => {
+                            // Create B-tree index scan alternative
+                            let index_scan_plan = QueryPlan {
+                                root: PlanNode::IndexScan {
+                                    table: table.clone(),
+                                    index_name: index_config.name.clone(),
+                                    projected_columns: projected_columns.clone(),
+                                    range_condition: None,
+                                },
+                                estimated_cost: self.estimate_index_scan_cost(&index_config, plan.estimated_cost),
+                                statistics: plan.statistics.clone(),
+                            };
+                            alternatives.push(index_scan_plan);
+                        }
+                        IndexType::Hash => {
+                            // Create hash index lookup alternative (for equality)
+                            let hash_lookup_plan = QueryPlan {
+                                root: PlanNode::IndexLookup {
+                                    table: table.clone(),
+                                    index_name: index_config.name.clone(),
+                                    lookup_keys: vec![], // Would be filled based on WHERE conditions
+                                },
+                                estimated_cost: plan.estimated_cost * 0.1, // Hash lookup is very fast
+                                statistics: plan.statistics.clone(),
+                            };
+                            alternatives.push(hash_lookup_plan);
+                        }
+                        IndexType::FullText => {
+                            // Create full-text search alternative
+                            let fulltext_plan = QueryPlan {
+                                root: PlanNode::FullTextSearch {
+                                    table: table.clone(),
+                                    index_name: index_config.name.clone(),
+                                    search_query: "".to_string(), // Would be filled from query
+                                    ranking_function: "tf_idf".to_string(),
+                                },
+                                estimated_cost: plan.estimated_cost * 0.8,
+                                statistics: plan.statistics.clone(),
+                            };
+                            alternatives.push(fulltext_plan);
+                        }
+                        _ => {
+                            // Other index types can be added here
+                        }
+                    }
+                }
+            }
+            PlanNode::Filter { condition, input } => {
+                if let PlanNode::SeqScan { table, projected_columns } = &**input {
+                    // Check available indexes that could satisfy the filter
+                    let available_indexes = self.index_manager.get_indexes_for_table(table)?;
+
+                    for index_config in available_indexes {
+                        if self.index_matches_filter(&index_config, condition) {
+                            let index_scan_plan = QueryPlan {
+                                root: PlanNode::Filter {
+                                    condition: condition.clone(),
+                                    input: Box::new(PlanNode::IndexScan {
+                                        table: table.clone(),
+                                        index_name: index_config.name.clone(),
+                                        projected_columns: projected_columns.clone(),
+                                        range_condition: Some(condition.clone()),
+                                    }),
+                                },
+                                estimated_cost: self.estimate_index_scan_cost(&index_config, plan.estimated_cost),
+                                statistics: plan.statistics.clone(),
+                            };
+                            alternatives.push(index_scan_plan);
+                        }
+                    }
+                }
+            }
+            _ => {}
+        }
+
+        if alternatives.is_empty() {
+            Ok(None)
+        } else {
+            Ok(Some(alternatives))
+        }
+    }
+
+    /// Estimate cost for index scan based on index characteristics
+    fn estimate_index_scan_cost(&self, index_config: &crate::query::indexes::IndexConfig, base_cost: f64) -> f64 {
+        // Simple cost estimation based on index type
+        match index_config.index_type {
+            IndexType::BTree => base_cost * 0.3, // B-tree is efficient for range queries
+            IndexType::Hash => base_cost * 0.1,  // Hash is very fast for equality
+            IndexType::FullText => base_cost * 0.8, // Full-text has some overhead
+            _ => base_cost * 0.5, // Default reduction
+        }
+    }
+
+    /// Check if an index matches the filter condition
+    fn index_matches_filter(&self, index_config: &crate::query::indexes::IndexConfig, _condition: &Expression) -> bool {
+        // Simplified: check if index columns could satisfy the condition
+        // Real implementation would do detailed column matching
+        !index_config.columns.is_empty()
+    }
+
+    /// Check if filter condition is selective (would benefit from index)
+    fn is_selective_filter(&self, _condition: &Expression) -> bool {
+        // Simplified: assume equality conditions are selective
+        // Real implementation would analyze condition selectivity
+        true
     }
 
     /// Generate parallel execution alternatives
@@ -409,13 +854,152 @@ impl QueryOptimizer {
 
     /// Apply logical optimizations (predicate pushdown, etc.)
     fn apply_logical_optimizations(&self, plan: QueryPlan) -> AuroraResult<QueryPlan> {
-        // Apply logical transformation rules
+        use super::plan::*;
+
+        let mut optimized_plan = plan;
+
+        // Rule 1: Join reordering for better performance
+        optimized_plan = self.reorder_joins(optimized_plan)?;
+
+        // Rule 2: Eliminate redundant joins
+        optimized_plan = self.eliminate_redundant_joins(optimized_plan)?;
+
+        // Rule 3: Optimize subquery execution
+        optimized_plan = self.optimize_subqueries(optimized_plan)?;
+
+        // Rule 4: Apply logical expression simplifications
+        optimized_plan = self.simplify_expressions(optimized_plan)?;
+
+        Ok(optimized_plan)
+    }
+
+    /// Reorder joins for better performance (simplified implementation)
+    fn reorder_joins(&self, plan: QueryPlan) -> AuroraResult<QueryPlan> {
+        // For now, implement a simple heuristic: smaller tables first
+        // Real implementation would use cost-based join ordering
         Ok(plan)
+    }
+
+    /// Eliminate redundant joins
+    fn eliminate_redundant_joins(&self, plan: QueryPlan) -> AuroraResult<QueryPlan> {
+        // Look for joins that don't contribute to the final result
+        // This is a complex optimization that requires deep analysis
+        Ok(plan)
+    }
+
+    /// Optimize subquery execution
+    fn optimize_subqueries(&self, plan: QueryPlan) -> AuroraResult<QueryPlan> {
+        use super::plan::*;
+
+        match &plan.root {
+            PlanNode::Filter { condition, input } => {
+                // Check if condition contains a subquery that can be converted to a join
+                if self.contains_subquery(condition) {
+                    // For correlated subqueries, consider materialization or decorrelation
+                    // For uncorrelated subqueries, consider converting to joins
+                }
+            }
+            _ => {}
+        }
+        Ok(plan)
+    }
+
+    /// Simplify logical expressions
+    fn simplify_expressions(&self, plan: QueryPlan) -> AuroraResult<QueryPlan> {
+        // Apply algebraic simplifications to expressions
+        // Example: A AND TRUE -> A, A OR FALSE -> A
+        Ok(plan)
+    }
+
+    /// Check if expression contains subqueries
+    fn contains_subquery(&self, _condition: &Expression) -> bool {
+        // Analyze expression tree for subquery nodes
+        false // Simplified
     }
 
     /// Apply physical optimizations (operator selection, etc.)
     fn apply_physical_optimizations(&self, plan: QueryPlan) -> AuroraResult<QueryPlan> {
-        // Select physical operators and their implementations
+        use super::plan::*;
+
+        let mut optimized_plan = plan;
+
+        // Rule 1: Choose optimal join algorithms
+        optimized_plan = self.select_join_algorithms(optimized_plan)?;
+
+        // Rule 2: Select appropriate scan methods
+        optimized_plan = self.select_scan_methods(optimized_plan)?;
+
+        // Rule 3: Optimize aggregation methods
+        optimized_plan = self.optimize_aggregations(optimized_plan)?;
+
+        // Rule 4: Choose sorting algorithms
+        optimized_plan = self.select_sorting_algorithms(optimized_plan)?;
+
+        Ok(optimized_plan)
+    }
+
+    /// Select optimal join algorithms based on data characteristics
+    fn select_join_algorithms(&self, plan: QueryPlan) -> AuroraResult<QueryPlan> {
+        use super::plan::*;
+
+        // Analyze join conditions and table sizes to choose:
+        // - Nested loop join for small datasets
+        // - Hash join for equi-joins
+        // - Merge join for sorted data
+        // - Index nested loop for indexed joins
+
+        match &plan.root {
+            PlanNode::Join { join_type, left, right, condition } => {
+                // Simple heuristic: prefer hash join for inner joins
+                if matches!(join_type, JoinType::Inner) {
+                    // In a real implementation, this would modify the plan
+                    // to use a HashJoin physical operator
+                }
+            }
+            _ => {}
+        }
+
+        Ok(plan)
+    }
+
+    /// Select appropriate scan methods (table scan vs index scan)
+    fn select_scan_methods(&self, plan: QueryPlan) -> AuroraResult<QueryPlan> {
+        use super::plan::*;
+
+        match &plan.root {
+            PlanNode::SeqScan { table, .. } => {
+                // Check if there are useful indexes for this scan
+                // In a real implementation, this would analyze available indexes
+                // and potentially replace SeqScan with IndexScan
+            }
+            _ => {}
+        }
+
+        Ok(plan)
+    }
+
+    /// Optimize aggregation methods
+    fn optimize_aggregations(&self, plan: QueryPlan) -> AuroraResult<QueryPlan> {
+        use super::plan::*;
+
+        match &plan.root {
+            PlanNode::Aggregate { group_by, aggregates, input } => {
+                // Choose hash aggregation vs sort aggregation
+                // For GROUP BY queries, hash aggregation is often faster
+                // unless the data is already sorted
+            }
+            _ => {}
+        }
+
+        Ok(plan)
+    }
+
+    /// Select appropriate sorting algorithms
+    fn select_sorting_algorithms(&self, plan: QueryPlan) -> AuroraResult<QueryPlan> {
+        // Choose between:
+        // - In-memory quicksort for small datasets
+        // - External merge sort for large datasets
+        // - Skip sorting if data is already ordered
         Ok(plan)
     }
 

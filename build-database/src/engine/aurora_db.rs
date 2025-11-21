@@ -53,6 +53,9 @@ pub struct AuroraDB {
     query_optimizer: Arc<QueryOptimizer>,
     execution_engine: Arc<ExecutionEngine>,
 
+    /// Index management system
+    index_manager: Arc<crate::query::indexes::IndexManager>,
+
     /// Transaction management
     transaction_manager: Arc<TransactionManager>,
 
@@ -108,7 +111,11 @@ impl AuroraDB {
         let query_parser = Arc::new(parser); // Wrap in Arc
 
         let query_planner = Arc::new(QueryPlanner::new(storage_manager.clone()).await?);
-        let query_optimizer = Arc::new(QueryOptimizer::new().await?);
+
+        // Initialize index manager for intelligent indexing
+        let index_manager = Arc::new(crate::query::indexes::IndexManager::new());
+
+        let query_optimizer = Arc::new(QueryOptimizer::new(index_manager.clone()).await?);
 
         // Use the working simple executor
         let simple_executor = Arc::new(SimpleQueryExecutor::new(working_btree));
@@ -186,6 +193,7 @@ impl AuroraDB {
             query_planner,
             query_optimizer,
             execution_engine,
+            index_manager,
             transaction_manager,
             vector_engine,
             vector_index_manager,
