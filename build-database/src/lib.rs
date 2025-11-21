@@ -27,6 +27,20 @@ pub mod enterprise;
 pub mod scaling;
 pub mod revolutionary;
 pub mod ultra_revolutionary;
+pub mod engine;
+pub mod config;
+pub mod logging;
+pub mod catalog;
+pub mod mvcc;
+pub mod network;
+pub mod backup;
+pub mod monitoring;
+
+// Re-export production-ready components
+pub use config::*;
+pub use logging::*;
+pub use catalog::*;
+pub use mvcc::*;
 
 // Advanced features re-exports
 pub use advanced::*;

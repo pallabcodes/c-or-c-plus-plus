@@ -17,6 +17,7 @@ pub mod btree_storage;
 pub mod compression_engine;
 pub mod storage_manager;
 pub mod recovery_manager;
+pub mod table_storage;
 
 pub use buffer_pool::*;
 pub use page_manager::*;
@@ -26,3 +27,4 @@ pub use btree_storage::*;
 pub use compression_engine::*;
 pub use storage_manager::*;
 pub use recovery_manager::*;
+pub use table_storage::*;

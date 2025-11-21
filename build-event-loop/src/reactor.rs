@@ -12,6 +12,7 @@
 
 use crate::config::{ReactorConfig, IoModel};
 use crate::error::{Error, Result};
+use crate::net::high_performance_stack::{HighPerformanceStack, PerformanceRequirements, ReliabilityLevel};
 use crate::scheduler::{Scheduler, Task, TaskPriority, TaskMetadata};
 use crate::timer::{TimerWheel, TimerCallback, TimerToken};
 use mio::{Events, Poll, Token};
@@ -80,6 +81,12 @@ pub struct Reactor {
 
     /// NUMA-aware task scheduler for optimal work distribution
     scheduler: Scheduler,
+
+    /// High-performance networking stack (RDMA, DPDK, XDP)
+    high_perf_stack: Option<HighPerformanceStack>,
+
+    /// Production monitoring and alerting
+    monitoring: Option<Arc<crate::alerting::AlertManager>>,
 
     /// Configuration
     config: ReactorConfig,
@@ -169,6 +176,28 @@ impl Reactor {
             }
         };
 
+        // Initialize high-performance networking stack if enabled
+        let high_perf_stack = if config.enable_high_performance_stack {
+            info!("Initializing high-performance networking stack (RDMA/DPDK/XDP)");
+            let requirements = PerformanceRequirements {
+                target_throughput: config.target_throughput,
+                max_latency: config.max_latency,
+                reliability: ReliabilityLevel::High,
+            };
+            match HighPerformanceStack::new(requirements) {
+                Ok(stack) => {
+                    info!("Successfully initialized high-performance networking stack");
+                    Some(stack)
+                }
+                Err(e) => {
+                    warn!("Failed to initialize high-performance stack ({}), continuing without it", e);
+                    None
+                }
+            }
+        } else {
+            None
+        };
+
         Ok(Self {
             poll,
             #[cfg(feature = "io-uring")]
@@ -176,6 +205,9 @@ impl Reactor {
             handlers: HashMap::new(),
             events,
             timer_wheel,
+            scheduler,
+            high_perf_stack,
+            monitoring: None, // Will be set later if monitoring is enabled
             config,
             next_token: 0,
             start_time: Instant::now(),
@@ -295,12 +327,19 @@ impl Reactor {
         let io_event_count = match self.io_model {
             #[cfg(feature = "io-uring")]
             IoModel::IoUring => {
-                // Use io_uring reactor
-                if let Some(ref mut io_uring) = self.io_uring_reactor {
-                    io_uring.process_completions()?
-                } else {
-                    0
+                let mut count = 0;
+
+                // Use high-performance networking stack if available
+                if let Some(ref mut high_perf) = self.high_perf_stack {
+                    count += high_perf.process_events()?;
                 }
+
+                // Use io_uring reactor as fallback/enhancement
+                if let Some(ref mut io_uring) = self.io_uring_reactor {
+                    count += io_uring.process_completions()?;
+                }
+
+                count
             }
             _ => {
                 // Use traditional epoll/kqueue
@@ -352,7 +391,31 @@ impl Reactor {
             debug!("Processed {} timer events", timer_count);
         }
 
-        Ok(io_event_count + timer_count)
+        // Process pending tasks using NUMA-aware scheduler
+        let task_count = self.scheduler.process_tasks()
+            .map_err(|e| Error::reactor(format!("Task processing failed: {}", e)))?;
+
+        if task_count > 0 {
+            debug!("Processed {} tasks", task_count);
+        }
+
+        // Evaluate monitoring and alerting rules (if enabled)
+        if let Some(alerting) = &self.monitoring {
+            // Run alerting evaluation periodically (every ~100 events or so)
+            static mut ALERT_COUNTER: u64 = 0;
+            unsafe {
+                ALERT_COUNTER += 1;
+                if ALERT_COUNTER % 100 == 0 {
+                    // Spawn alerting evaluation to avoid blocking event loop
+                    let alerting = Arc::clone(alerting);
+                    tokio::spawn(async move {
+                        let _ = alerting.evaluate_alerts().await;
+                    });
+                }
+            }
+        }
+
+        Ok(io_event_count + timer_count + task_count)
     }
 
     /// Run the event loop continuously
@@ -401,6 +464,33 @@ impl Reactor {
         // Basic health checks
         self.handlers.len() <= 10000 && // Reasonable handler limit
         self.start_time.elapsed() < Duration::from_secs(365 * 24 * 3600) // Not running for a year
+    }
+
+    /// Set up monitoring and alerting for the reactor
+    pub fn setup_monitoring(&mut self, alert_manager: Arc<crate::alerting::AlertManager>) {
+        self.monitoring = Some(alert_manager);
+        info!("Production monitoring and alerting enabled for reactor");
+    }
+
+    /// Get reactor monitoring metrics
+    pub fn monitoring_metrics(&self) -> HashMap<String, f64> {
+        let mut metrics = HashMap::new();
+
+        metrics.insert("reactor_uptime_seconds".to_string(), self.start_time.elapsed().as_secs_f64());
+        metrics.insert("reactor_registered_handlers".to_string(), self.handlers.len() as f64);
+        metrics.insert("reactor_active_timers".to_string(), self.timer_wheel.stats().active_tokens as f64);
+        metrics.insert("reactor_scheduler_active_tasks".to_string(), self.scheduler.active_task_count() as f64);
+
+        // Add high-performance stack metrics if available
+        #[cfg(feature = "io-uring")]
+        if let Some(ref io_uring) = self.io_uring_reactor {
+            if let Some(stats) = io_uring.stats() {
+                metrics.insert("reactor_io_uring_submissions".to_string(), stats.submissions as f64);
+                metrics.insert("reactor_io_uring_completions".to_string(), stats.completions as f64);
+            }
+        }
+
+        metrics
     }
 
     /// Submit a task to the NUMA-aware scheduler

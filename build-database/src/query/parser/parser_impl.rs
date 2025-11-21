@@ -35,7 +35,7 @@ impl SqlParser {
     }
 
     /// Parse a SQL query string into a Query AST
-    pub fn parse(&mut self, sql: &str) -> ParseResult<Query> {
+    pub async fn parse(&mut self, sql: &str) -> ParseResult<Query> {
         let start_time = std::time::Instant::now();
 
         // Tokenize the input

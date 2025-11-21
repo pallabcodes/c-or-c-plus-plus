@@ -14,7 +14,7 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::runtime::Runtime;
-use tracing::{info, error};
+use tracing::{info, error, warn};
 
 /// Main Cyclone event loop runtime
 ///
@@ -70,25 +70,40 @@ impl Cyclone {
     ///
     /// This method will run the Cyclone event loop until an error occurs
     /// or the process is terminated.
-    pub fn run(self) -> Result<()> {
+    pub fn run(mut self) -> Result<()> {
         info!("Starting Cyclone event loop");
-
-        // In a full implementation, this would integrate the reactor
-        // with the async runtime for cooperative scheduling
 
         #[cfg(feature = "tokio-runtime")]
         {
-            // For now, we'll run the tokio runtime
+            // Integrated async runtime with cooperative scheduling
             self.runtime.block_on(async {
-                // Future integration point: run reactor in background
-                // while handling async tasks cooperatively
-                std::future::pending::<()>().await;
+                // Spawn reactor processing in background
+                let reactor_handle = tokio::spawn(async move {
+                    loop {
+                        match self.reactor.poll_once() {
+                            Ok(events) => {
+                                if events == 0 {
+                                    // Yield control to async tasks
+                                    tokio::task::yield_now().await;
+                                    std::thread::sleep(Duration::from_micros(100));
+                                }
+                            }
+                            Err(e) => {
+                                error!("Reactor error: {}", e);
+                                break;
+                            }
+                        }
+                    }
+                });
+
+                // Wait for reactor to complete (or handle shutdown signal)
+                let _ = reactor_handle.await;
             });
         }
 
         #[cfg(not(feature = "tokio-runtime"))]
         {
-            // Run just the reactor
+            // Run just the reactor (synchronous mode)
             self.reactor.run()?;
         }
 

@@ -1,25 +1,15 @@
-//! Network Protocol Layer
+//! AuroraDB Network Layer
 //!
-//! Client/server communication and distributed protocols:
-//! - Wire protocol compatible with PostgreSQL/MySQL clients
-//! - Connection pooling and multiplexing
-//! - Distributed consensus and replication protocols
-//! - Network optimization and compression
+//! This module implements the PostgreSQL wire protocol and connection pooling
+//! for AuroraDB, enabling it to accept client connections and handle queries.
 //!
-//! UNIQUENESS: Fuses PostgreSQL wire protocol + gRPC streaming + RDMA optimization
-//! Research: Zero-copy networking + protocol buffers + consensus algorithms
+//! UNIQUENESS: PostgreSQL-compatible protocol with AuroraDB's advanced features
+//! like window functions, aggregates, and MVCC transactions.
 
-pub mod protocol;
+pub mod postgres_protocol;
+pub mod connection_pool;
 pub mod server;
-pub mod client;
-pub mod connection;
-pub mod pooling;
-pub mod distributed;
 
-// Re-export main network components
-pub use protocol::{WireProtocol, MessageType, AuroraMessage};
-pub use server::AuroraServer;
-pub use client::AuroraClient;
-pub use connection::{Connection, ConnectionConfig};
-pub use pooling::ConnectionPool;
-pub use distributed::{ConsensusProtocol, ReplicationProtocol};
+pub use postgres_protocol::*;
+pub use connection_pool::*;
+pub use server::*;

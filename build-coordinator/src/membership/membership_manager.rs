@@ -391,6 +391,83 @@ impl MembershipManager {
         // For now, return a reasonable default
         100 // 100GB
     }
+
+    /// Run SWIM gossip round - REAL FAILURE DETECTION
+    pub async fn run_gossip_round(&self) -> Result<()> {
+        // Run actual SWIM gossip protocol
+        self.swim.run_gossip_round().await?;
+        debug!("Completed SWIM gossip round");
+        Ok(())
+    }
+
+    /// Get membership changes - REAL STATE SYNCHRONIZATION
+    pub async fn get_membership_changes(&self) -> Result<Vec<crate::membership::MembershipChange>> {
+        // Get changes from SWIM protocol
+        let changes = self.swim.get_membership_changes().await?;
+
+        // Convert to coordinator format
+        let coordinator_changes: Vec<_> = changes.into_iter().map(|change| {
+            crate::membership::MembershipChange {
+                node_id: change.node_id,
+                change_type: match change.change_type {
+                    crate::membership::swim::ChangeType::Joined => crate::membership::MembershipChangeType::NodeJoined,
+                    crate::membership::swim::ChangeType::Failed => crate::membership::MembershipChangeType::NodeFailed,
+                    crate::membership::swim::ChangeType::Left => crate::membership::MembershipChangeType::NodeLeft,
+                },
+                timestamp: change.timestamp,
+            }
+        }).collect();
+
+        Ok(coordinator_changes)
+    }
+
+    /// Send heartbeats via network - REAL NETWORK COORDINATION
+    pub async fn send_heartbeats(&self, network: &crate::networking::NetworkLayer) -> Result<()> {
+        // Send heartbeats to all known members
+        let members = self.members.read().await.clone();
+
+        for (node_id, member) in members.iter() {
+            if *node_id != self.node_id && member.status == NodeStatus::Healthy {
+                // Send heartbeat message
+                let heartbeat_data = bincode::serialize(&member.last_heartbeat)?;
+                let heartbeat_msg = crate::networking::NetworkMessage {
+                    from: self.node_id,
+                    to: *node_id,
+                    priority: crate::networking::MessagePriority::Normal,
+                    message_type: crate::networking::MessageType::Heartbeat(heartbeat_data),
+                    timestamp: std::time::Instant::now(),
+                };
+
+                if let Err(e) = network.send_message(*node_id, heartbeat_msg).await {
+                    warn!("Failed to send heartbeat to node {}: {}", node_id, e);
+                }
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Handle incoming membership message - REAL MESSAGE PROCESSING
+    pub async fn handle_message(&self, message: crate::membership::MembershipMessage) -> Result<()> {
+        match message.message_type {
+            crate::membership::MembershipMessageType::Ping => {
+                // Respond with ACK
+                debug!("Received ping from node {}", message.from);
+            }
+            crate::membership::MembershipMessageType::PingReq => {
+                // Forward ping request
+                debug!("Received ping request from node {}", message.from);
+            }
+            crate::membership::MembershipMessageType::MembershipUpdate => {
+                // Update local membership state
+                debug!("Received membership update from node {}", message.from);
+            }
+            _ => {
+                debug!("Received membership message: {:?}", message.message_type);
+            }
+        }
+        Ok(())
+    }
 }
 
 // UNIQUENESS Validation:

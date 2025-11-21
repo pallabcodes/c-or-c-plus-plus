@@ -1,0 +1,56 @@
+[Unit]
+Description=AuroraDB Production Database Server
+Documentation=https://docs.aurora-db.com
+After=network.target
+Requires=network.target
+
+[Service]
+Type=exec
+User=aurora
+Group=aurora
+Environment=RUST_LOG=info
+Environment=RUST_BACKTRACE=1
+Environment=AURORA_CONFIG=/etc/aurora/config.toml
+Environment=AURORA_DATA_DIR=/var/lib/aurora
+Environment=AURORA_LOG_DIR=/var/log/aurora
+
+# Production hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ReadWritePaths=/var/lib/aurora /var/log/aurora
+ProtectHome=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+MemoryDenyWriteExecute=true
+
+# Resource limits
+LimitNOFILE=65536
+LimitNPROC=4096
+
+# Restart policy
+Restart=on-failure
+RestartSec=5s
+StartLimitInterval=300s
+StartLimitBurst=5
+
+# Graceful shutdown
+TimeoutStopSec=30s
+KillMode=mixed
+KillSignal=SIGTERM
+
+# Execution
+WorkingDirectory=/var/lib/aurora
+ExecStartPre=/bin/bash -c 'mkdir -p /var/lib/aurora /var/log/aurora'
+ExecStartPre=/bin/bash -c 'chown -R aurora:aurora /var/lib/aurora /var/log/aurora'
+ExecStart=/usr/local/bin/aurora-db
+ExecReload=/bin/kill -HUP $MAINPID
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=aurora-db
+
+[Install]
+WantedBy=multi-user.target

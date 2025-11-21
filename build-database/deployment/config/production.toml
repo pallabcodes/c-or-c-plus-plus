@@ -1,178 +1,202 @@
 # AuroraDB Production Configuration
-# This file contains production-ready settings for AuroraDB
+# This configuration is optimized for production deployments
 
 [database]
-# Database connection settings
+# Maximum concurrent connections
 max_connections = 1000
-connection_timeout_ms = 30000
-idle_timeout_ms = 300000
+# Buffer pool size in bytes (1GB)
+buffer_pool_size = 1073741824
+# Maximum tables per database
+max_tables = 10000
+# Maximum columns per table
+max_columns_per_table = 1000
+# Default isolation level
+default_isolation_level = "read_committed"
+# Transaction timeout in milliseconds
+transaction_timeout_ms = 300000
+# Query cache size in MB
+query_cache_size_mb = 512
+# Enable query logging
+enable_query_logging = true
+# Enable metrics collection
+enable_metrics = true
+# Database data directory
+data_directory = "/var/lib/aurora/data"
+# Database temp directory
+temp_directory = "/tmp/aurora"
 
-# Storage settings
-data_directory = "/aurora/data"
-wal_directory = "/aurora/data/wal"
-enable_compression = true
-compaction_threads = 4
-buffer_pool_size = "2GB"
-
-# Performance settings
-enable_jit = true
-jit_cache_size_mb = 512
-jit_optimization_level = "aggressive"
-query_cache_size_mb = 256
+[server]
+# PostgreSQL wire protocol port
+postgresql_port = 5433
+# HTTP API port
+http_port = 8080
+# Binary protocol port
+binary_port = 9090
+# Bind address
+bind_address = "0.0.0.0"
+# Server hostname
+hostname = "aurora-db"
+# Maximum request size in MB
+max_request_size_mb = 10
+# Request timeout in seconds
+request_timeout_seconds = 30
+# Enable graceful shutdown
+enable_graceful_shutdown = true
+# Graceful shutdown timeout in seconds
+shutdown_timeout_seconds = 30
 
 [storage]
-# Storage engine settings
-default_storage_engine = "hybrid"
-enable_compression = true
-compression_algorithm = "lz4"
+# Storage engine selection strategy
+selection_strategy = "workload_based"
+# B+ Tree configuration
+[storage.btree]
 page_size_kb = 8
-max_concurrent_compactions = 4
-
-# B-tree settings
-btree_order = 256
-enable_prefix_compression = true
-
-# LSM settings
-lsm_levels = 7
-lsm_size_ratio = 10
-enable_bloom_filters = true
-bloom_filter_bits_per_key = 10
+max_table_size_mb = 10240
+cache_size_mb = 2048
+max_concurrent_transactions = 200
+# LSM Tree configuration
+[storage.lsm]
+memtable_size_mb = 128
+sstable_size_mb = 512
+compaction_threads = 4
+bloom_filter_bits = 10
+# Hybrid configuration
+[storage.hybrid]
+adaptive_threshold = 10000
+vector_threshold = 0.1
+# WAL configuration
+[storage.wal]
+directory = "/var/lib/aurora/wal"
+segment_size_mb = 64
+max_segments = 100
+sync_strategy = "fsync"
+flush_interval_ms = 1000
+# Compression configuration
+[storage.compression]
+algorithm = "lz4"
+level = 1
+min_block_size = 65536
 
 [network]
-# Network settings
-bind_address = "0.0.0.0:5432"
-http_bind_address = "0.0.0.0:8080"
-metrics_bind_address = "0.0.0.0:9090"
-
-# Connection pooling
-max_connections_per_ip = 100
-connection_backlog = 128
-enable_ssl = true
-ssl_cert_file = "/etc/ssl/certs/aurora.crt"
-ssl_key_file = "/etc/ssl/private/aurora.key"
-
-# Timeouts
-connection_timeout_ms = 30000
-query_timeout_ms = 300000
-idle_timeout_ms = 300000
+# Connection pool configuration
+[network.connection_pool]
+max_connections = 1000
+min_idle = 10
+max_idle_time_seconds = 300
+connection_timeout_seconds = 30
+health_check_interval_seconds = 60
+# TLS configuration
+[network.tls]
+enabled = true
+cert_file = "/etc/aurora/ssl/server.crt"
+key_file = "/etc/aurora/ssl/server.key"
+ca_file = "/etc/aurora/ssl/ca.crt"
+min_version = "TLS1.2"
+mutual_auth = false
+# Load balancer configuration
+[network.load_balancer]
+enabled = false
+algorithm = "round_robin"
+health_check_interval_seconds = 30
+failover_timeout_seconds = 30
 
 [security]
-# Security settings
+# Enable authentication
 enable_authentication = true
-password_encryption = "scrypt"
-session_timeout_ms = 3600000
-max_login_attempts = 5
-enable_audit_log = true
-
-# TLS settings
-tls_min_version = "TLSv1.2"
-tls_cipher_suites = [
-    "ECDHE-ECDSA-AES128-GCM-SHA256",
-    "ECDHE-RSA-AES128-GCM-SHA256",
-    "ECDHE-ECDSA-AES256-GCM-SHA384",
-    "ECDHE-RSA-AES256-GCM-SHA384"
-]
-
-[cluster]
-# Cluster settings
-mode = "cluster"
-cluster_name = "aurora-cluster"
-node_id = "auto"
-discovery_method = "kubernetes"
-
-# Replication settings
-replication_factor = 3
-sync_replication = false
-max_replication_lag_ms = 1000
-
-# Consensus settings
-election_timeout_ms = 5000
-heartbeat_interval_ms = 1000
-consensus_protocol = "raft"
+# Enable authorization
+enable_authorization = true
+# Password minimum length
+password_min_length = 12
+# Session timeout in minutes
+session_timeout_minutes = 60
+# Enable row-level security
+enable_row_level_security = false
+# Encryption at rest
+encryption_at_rest = false
+# Encryption key file
+encryption_key_file = "/etc/aurora/keys/master.key"
 
 [logging]
-# Logging settings
+# Log level (error, warn, info, debug, trace)
 level = "info"
+# Log format (json, text, compact)
 format = "json"
-enable_console_logging = true
-enable_file_logging = true
-log_directory = "/aurora/logs"
-max_log_file_size_mb = 100
-max_log_files = 10
-
-# Audit logging
-enable_audit_log = true
-audit_log_level = "info"
-
-[monitoring]
-# Monitoring settings
-enable_metrics = true
-metrics_interval_ms = 15000
-enable_health_checks = true
-health_check_interval_ms = 30000
-
-# Prometheus settings
-prometheus_enabled = true
-prometheus_path = "/metrics"
-
-# Alerting thresholds
-alert_high_connection_count = 800
-alert_high_memory_usage_percent = 85
-alert_high_disk_usage_percent = 90
-alert_high_query_latency_ms = 1000
-
-[maintenance]
-# Maintenance settings
-auto_vacuum_enabled = true
-vacuum_interval_hours = 6
-auto_analyze_enabled = true
-analyze_interval_hours = 12
-
-# Backup settings
-backup_enabled = true
-backup_interval_hours = 24
-backup_retention_days = 30
-backup_directory = "/aurora/backups"
-
-# Index maintenance
-auto_reindex_enabled = true
-reindex_interval_days = 7
-
-[query]
-# Query processing settings
-max_query_length_bytes = 1048576  # 1MB
-enable_query_cache = true
-query_cache_size_mb = 256
-enable_query_logging = false
+# Log file path
+file = "/var/log/aurora/aurora.log"
+# Maximum log file size in MB
+max_size_mb = 100
+# Maximum number of log files
+max_files = 10
+# Enable log compression
+compress_rotated = true
+# Slow query threshold in milliseconds
 slow_query_threshold_ms = 1000
 
-# Optimizer settings
-enable_cost_based_optimization = true
-statistics_update_interval_hours = 6
-histogram_buckets = 100
+[monitoring]
+# Enable Prometheus metrics
+enable_prometheus = true
+# Prometheus metrics port
+prometheus_port = 9091
+# Metrics collection interval in seconds
+collection_interval_seconds = 15
+# Enable health checks
+enable_health_checks = true
+# Health check port
+health_check_port = 8081
+# Alert thresholds
+[monitoring.alert_thresholds]
+cpu_high_threshold = 80
+memory_high_threshold = 85
+disk_high_threshold = 90
+connection_pool_high_threshold = 95
+slow_query_threshold_ms = 5000
 
-[jit]
-# JIT compilation settings
-enabled = true
-optimization_level = "aggressive"
-cache_size_mb = 512
-max_compilation_time_ms = 1000
-enable_simd = true
-enable_loop_unrolling = true
-enable_inlining = true
+[transaction]
+# Maximum concurrent transactions
+max_concurrent_transactions = 200
+# Deadlock detection interval in milliseconds
+deadlock_detection_interval_ms = 100
+# Transaction timeout in milliseconds
+transaction_timeout_ms = 300000
+# Isolation level
+isolation_level = "read_committed"
+# Enable distributed transactions
+enable_distributed_transactions = false
+# Transaction log directory
+log_directory = "/var/lib/aurora/tx_logs"
 
 [vector]
-# Vector processing settings
-enable_vector_extensions = true
-vector_similarity_metrics = ["cosine", "euclidean", "dot_product"]
-max_vector_dimensions = 4096
-vector_index_type = "hnsw"
-hnsw_ef_construction = 200
-hnsw_m = 16
+# Default vector dimension
+default_dimension = 384
+# Index type (hnsw, ivf, flat)
+index_type = "hnsw"
+# Maximum connections per layer (HNSW)
+max_connections = 32
+# Construction search parameter (HNSW)
+ef_construction = 200
+# Query search parameter (HNSW)
+ef_search = 64
+# Enable GPU acceleration
+enable_gpu = false
+# Vector cache size in MB
+cache_size_mb = 1024
 
-[experimental]
-# Experimental features (use with caution)
-enable_experimental_features = false
-enable_query_pipelining = false
-enable_distributed_joins = false
-enable_adaptive_compression = false
+[audit]
+# Enable audit logging
+enable_audit_logging = true
+# Audit log file path
+audit_log_file = "/var/log/aurora/audit.log"
+# Log sensitive operations
+log_sensitive_operations = true
+# Log connection events
+log_connection_events = true
+# Log DDL operations
+log_ddl_operations = true
+# Log DML operations
+log_dml_operations = false
+# Sample rate for DML operations (0.0 to 1.0)
+dml_sample_rate = 0.1
+# Retention period in days
+retention_days = 365
+# Maximum audit log size in MB
+max_log_size_mb = 1024

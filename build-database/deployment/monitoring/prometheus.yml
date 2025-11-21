@@ -1,0 +1,65 @@
+# Prometheus configuration for AuroraDB monitoring
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # AuroraDB metrics
+  - job_name: 'auroradb'
+    static_configs:
+      - targets: ['auroradb:9091']
+    scrape_interval: 5s
+    metrics_path: '/metrics'
+
+  # AuroraDB health checks
+  - job_name: 'auroradb-health'
+    static_configs:
+      - targets: ['auroradb:8081']
+    scrape_interval: 30s
+    metrics_path: '/health'
+    params:
+      format: ['prometheus']
+
+  # Node exporter for system metrics
+  - job_name: 'node'
+    static_configs:
+      - targets: ['node-exporter:9100']
+
+  # PostgreSQL exporter (if running comparison benchmarks)
+  - job_name: 'postgres'
+    static_configs:
+      - targets: ['postgres:9187']
+    scrape_interval: 30s
+
+  # Redis exporter (if running full stack)
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:9121']
+
+# Alerting configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: 'prometheus'
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+      - targets: ['localhost:9090']

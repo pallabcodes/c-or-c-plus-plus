@@ -92,6 +92,23 @@ pub mod networking;
 pub mod orchestration;
 pub mod monitoring;
 
+// Phase 1: Production APIs & Deployment
+pub mod api;
+pub mod config_management;
+pub mod deployment;
+
+// Phase 2: Enterprise Compliance & Operations
+pub mod backup_recovery;
+pub mod compliance;
+pub mod upgrade_migration;
+
+// Phase 3: Advanced Features (planned)
+pub mod multi_region;
+pub mod observability;
+pub mod resource_management;
+pub mod security;
+pub mod testing;
+
 // Re-export networking components
 pub use networking::{NetworkLayer, NetworkConfig, ConnectionType};
 

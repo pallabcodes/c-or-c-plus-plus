@@ -353,9 +353,46 @@ pub struct PerformanceMetrics {
     pub response_queue_depth: usize,
 }
 
+/// Database operation for transactions
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct DatabaseOperation {
+    /// Operation type
+    pub operation_type: OperationType,
+
+    /// Table name
+    pub table: String,
+
+    /// Key for the operation
+    pub key: Vec<u8>,
+
+    /// Value for the operation
+    pub value: Option<Vec<u8>>,
+
+    /// Conditions for conditional operations
+    pub conditions: Vec<OperationCondition>,
+}
+
+/// Database operation types
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum OperationType {
+    Insert,
+    Update,
+    Delete,
+    Select,
+}
+
+/// Operation condition for conditional operations
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct OperationCondition {
+    pub column: String,
+    pub operator: String,
+    pub value: Vec<u8>,
+}
+
 // UNIQUENESS Validation: Type Design
 // - [x] Memory-safe types (no unsafe pointers)
 // - [x] Research-backed data structures (log-structured for consensus)
 // - [x] Comprehensive type coverage for distributed coordination
 // - [x] AuroraDB + Cyclone integration types
 // - [x] Linux kernel inspired performance metrics
+// - [x] Transaction coordination types for 2PC

@@ -34,7 +34,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .long("port")
             .value_name("PORT")
             .help("Database port")
-            .default_value("5432"))
+            .default_value("8080"))
         .arg(Arg::new("user")
             .short('U')
             .long("user")

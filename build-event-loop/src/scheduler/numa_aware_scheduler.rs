@@ -255,6 +255,69 @@ impl NumaAwareScheduler {
         self.stats.lock().unwrap().clone()
     }
 
+    /// Process pending tasks using work-stealing algorithm
+    /// Returns the number of tasks processed
+    pub fn process_tasks(&self) -> Result<usize> {
+        let mut tasks_processed = 0;
+        let start_time = Instant::now();
+
+        // Process tasks from local queues first
+        for local_queue in self.local_queues.iter() {
+            if let Ok(mut queue) = local_queue.try_lock() {
+                while let Some(task) = queue.pop_bottom() {
+                    // Execute the task
+                    let task_start = Instant::now();
+                    (task.function)();
+                    let execution_time = task_start.elapsed();
+
+                    // Update statistics
+                    let mut stats = self.stats.lock().unwrap();
+                    stats.tasks_completed += 1;
+                    stats.total_execution_time += execution_time;
+                    if execution_time > stats.max_execution_time {
+                        stats.max_execution_time = execution_time;
+                    }
+
+                    tasks_processed += 1;
+
+                    // Yield after processing a few tasks to prevent starvation
+                    if tasks_processed % 10 == 0 {
+                        std::thread::yield_now();
+                    }
+                }
+            }
+        }
+
+        // Try work-stealing from other queues if we have capacity
+        if tasks_processed == 0 {
+            for steal_queue in self.local_queues.iter() {
+                if let Ok(mut queue) = steal_queue.try_lock() {
+                    if let Some(task) = queue.steal() {
+                        let task_start = Instant::now();
+                        (task.function)();
+                        let execution_time = task_start.elapsed();
+
+                        let mut stats = self.stats.lock().unwrap();
+                        stats.tasks_completed += 1;
+                        stats.tasks_stolen += 1;
+                        stats.total_execution_time += execution_time;
+                        if execution_time > stats.max_execution_time {
+                            stats.max_execution_time = execution_time;
+                        }
+
+                        tasks_processed += 1;
+                        break; // Only steal one task per call
+                    }
+                }
+            }
+        }
+
+        let processing_time = start_time.elapsed();
+        debug!("Processed {} tasks in {:?}", tasks_processed, processing_time);
+
+        Ok(tasks_processed)
+    }
+
     /// Shutdown the scheduler gracefully
     pub fn shutdown(self) -> Result<()> {
         info!("Shutting down NUMA-aware scheduler");

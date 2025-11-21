@@ -83,7 +83,9 @@ pub enum Expression {
     Column(String),
     BinaryOp(BinaryOp),
     Function(FunctionCall),
+    WindowFunction(WindowFunction),
     VectorLiteral(Vec<f64>),
+    Asterisk,
 }
 
 /// Binary operations
@@ -116,6 +118,40 @@ pub enum BinaryOperator {
 pub struct FunctionCall {
     pub name: String,
     pub arguments: Vec<Expression>,
+}
+
+/// Window function specification
+#[derive(Debug, Clone)]
+pub struct WindowFunction {
+    pub function: FunctionCall,
+    pub partition_by: Vec<Expression>,
+    pub order_by: Vec<OrderByItem>,
+    pub frame_clause: Option<FrameClause>,
+}
+
+/// Window frame clause
+#[derive(Debug, Clone)]
+pub struct FrameClause {
+    pub frame_type: FrameType,
+    pub start_bound: FrameBound,
+    pub end_bound: Option<FrameBound>,
+}
+
+/// Window frame types
+#[derive(Debug, Clone)]
+pub enum FrameType {
+    Rows,
+    Range,
+}
+
+/// Window frame bounds
+#[derive(Debug, Clone)]
+pub enum FrameBound {
+    UnboundedPreceding,
+    Preceding(u64),
+    CurrentRow,
+    Following(u64),
+    UnboundedFollowing,
 }
 
 /// Literal values

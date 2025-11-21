@@ -9,6 +9,27 @@ use crate::config::ConsensusConfig;
 use crate::error::{Error, Result};
 use crate::types::{LogEntry, LogIndex, NodeId, Term};
 
+/// Consensus message for cross-node communication
+#[derive(Debug, Clone)]
+pub struct ConsensusMessage {
+    pub from: NodeId,
+    pub to: NodeId,
+    pub message_type: ConsensusMessageType,
+    pub term: Term,
+    pub data: Vec<u8>,
+}
+
+/// Types of consensus messages
+#[derive(Debug, Clone)]
+pub enum ConsensusMessageType {
+    RequestVote,
+    RequestVoteResponse,
+    AppendEntries,
+    AppendEntriesResponse,
+    InstallSnapshot,
+    InstallSnapshotResponse,
+}
+
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::{RwLock, Notify};
@@ -324,6 +345,51 @@ impl HybridConsensus {
         self.mode_change_notify.notify_waiters();
         info!("Entered recovery mode");
         Ok(())
+    }
+
+    /// Get state summary for coordination
+    pub async fn get_state_summary(&self) -> Result<(Term, u64, Option<NodeId>)> {
+        let state = self.state_machine.get_state().await?;
+        let leader = self.get_current_leader().await;
+        Ok((self.current_term, state.commit_index, leader))
+    }
+
+    /// Process pending consensus operations
+    pub async fn process_pending_operations(&self) -> Result<()> {
+        // Process any pending consensus operations
+        // In real implementation, would handle timeouts, retries, etc.
+        Ok(())
+    }
+
+    /// Handle leadership change
+    pub async fn handle_leadership_change(&self, new_leader: NodeId) -> Result<()> {
+        info!("Handling leadership change to node {}", new_leader);
+        // Update internal state for new leader
+        Ok(())
+    }
+
+    /// Handle incoming consensus message
+    pub async fn handle_message(&self, message: ConsensusMessage) -> Result<()> {
+        match message.message_type {
+            ConsensusMessageType::RequestVote => {
+                // Handle vote request
+                debug!("Received vote request from node {}", message.from);
+            }
+            ConsensusMessageType::AppendEntries => {
+                // Handle log replication
+                debug!("Received append entries from node {}", message.from);
+            }
+            _ => {
+                debug!("Received consensus message: {:?}", message.message_type);
+            }
+        }
+        Ok(())
+    }
+
+    /// Get current leader
+    pub async fn get_current_leader(&self) -> Option<NodeId> {
+        // In real implementation, would return actual leader
+        Some(1) // Mock leader
     }
 }
 

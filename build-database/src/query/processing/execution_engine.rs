@@ -13,6 +13,13 @@ use tokio::sync::mpsc;
 use crate::core::errors::{AuroraResult, AuroraError};
 use super::plan::*;
 use super::ast::*;
+use super::simple_executor::SimpleQueryExecutor;
+
+/// Trait for execution plan executors
+#[async_trait::async_trait]
+pub trait ExecutionPlanExecutor: Send + Sync {
+    async fn execute_plan(&self, plan: &QueryPlan, context: &ExecutionContext) -> AuroraResult<ExecutionResult>;
+}
 
 /// High-performance query execution engine
 pub struct ExecutionEngine {
@@ -33,6 +40,9 @@ pub struct ExecutionEngine {
 
     /// Parallel execution scheduler
     parallel_scheduler: ParallelScheduler,
+
+    /// Simple executor for basic queries (optional)
+    simple_executor: Option<Arc<dyn ExecutionPlanExecutor + Send + Sync>>,
 }
 
 /// Execution context for a query
@@ -171,6 +181,36 @@ pub struct ExecutionResult {
 }
 
 impl ExecutionEngine {
+    /// Create a new execution engine with a pre-configured executor
+    pub async fn new_with_executor(executor: Arc<dyn ExecutionPlanExecutor + Send + Sync>) -> AuroraResult<Self> {
+        let mut operator_factory = OperatorFactory::new();
+        operator_factory.register_simple_executor(executor);
+
+        Ok(Self {
+            execution_context: Arc::new(ExecutionContext {
+                query_id: "".to_string(),
+                user_id: "".to_string(),
+                session_id: "".to_string(),
+                start_time: std::time::Instant::now(),
+                timeout: None,
+                memory_limit_mb: 1024,
+                max_parallel_workers: 4,
+                execution_mode: ExecutionMode::Sequential,
+                parameters: HashMap::new(),
+                transaction_id: None,
+            }),
+            operator_factory,
+            stats_collector: Arc::new(RuntimeStatsCollector {
+                query_stats: RwLock::new(HashMap::new()),
+                operator_stats: RwLock::new(HashMap::new()),
+            }),
+            adaptive_controller: AdaptiveExecutionController::new(),
+            memory_manager: MemoryManager::new(1024),
+            parallel_scheduler: ParallelScheduler::new(4),
+            simple_executor: Some(executor),
+        })
+    }
+
     /// Create a new execution engine
     pub fn new() -> Self {
         let mut operator_factory = OperatorFactory::new();
@@ -218,11 +258,18 @@ impl ExecutionEngine {
                 active_tasks: 0,
                 work_queue: VecDeque::new(),
             },
+            simple_executor: None,
+            },
         }
     }
 
     /// Execute a query plan
     pub async fn execute_plan(&self, plan: QueryPlan, context: ExecutionContext) -> AuroraResult<ExecutionResult> {
+        // Use simple executor if available (for basic functionality)
+        if let Some(ref executor) = self.simple_executor {
+            return executor.execute_plan(&plan, &context).await;
+        }
+
         let start_time = std::time::Instant::now();
 
         // Set execution context
@@ -487,6 +534,12 @@ impl OperatorFactory {
 
     fn register_sort_operator(&mut self) {
         // Registration would happen here
+    }
+
+    fn register_simple_executor(&mut self, executor: Arc<dyn ExecutionPlanExecutor + Send + Sync>) {
+        // Store the executor for use in execution
+        // This is a simplified approach - in a real implementation,
+        // we'd integrate this with the operator system
     }
 
     async fn create_seq_scan_operator(&self, node: &SeqScanNode, context: &ExecutionContext) -> AuroraResult<Box<dyn ExecutionOperator>> {

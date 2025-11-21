@@ -124,6 +124,77 @@ pub struct ObservabilityConfig {
     pub tracing_sample_rate: f64,
 }
 
+/// Reactor configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ReactorConfig {
+    /// I/O model to use
+    pub io_model: IoModel,
+    /// Poll timeout for event waiting
+    pub poll_timeout: Duration,
+    /// Maximum number of concurrent connections
+    pub max_connections: usize,
+    /// Timer configuration
+    pub timer: TimerConfig,
+    /// Scheduler configuration
+    pub scheduler: SchedulerConfig,
+    /// Enable high-performance networking stack
+    pub enable_high_performance_stack: bool,
+    /// Target throughput for performance optimization
+    pub target_throughput: usize,
+    /// Maximum acceptable latency
+    pub max_latency: Duration,
+}
+
+impl Default for ReactorConfig {
+    fn default() -> Self {
+        Self {
+            io_model: IoModel::Auto,
+            poll_timeout: Duration::from_millis(100),
+            max_connections: 10000,
+            timer: TimerConfig::default(),
+            scheduler: SchedulerConfig::default(),
+            enable_high_performance_stack: false,
+            target_throughput: 100000, // 100K RPS
+            max_latency: Duration::from_millis(10),
+        }
+    }
+}
+
+/// I/O model selection
+#[derive(Debug, Clone, Copy, Serialize, Deserialize)]
+pub enum IoModel {
+    /// Automatically detect the best I/O model
+    Auto,
+    /// Use epoll/kqueue
+    Epoll,
+    /// Use io_uring (Linux 5.1+)
+    IoUring,
+}
+
+/// Scheduler configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SchedulerConfig {
+    /// Number of worker threads
+    pub num_workers: usize,
+    /// Work-stealing enabled
+    pub work_stealing: bool,
+    /// NUMA awareness enabled
+    pub numa_aware: bool,
+    /// Task queue size per worker
+    pub queue_size: usize,
+}
+
+impl Default for SchedulerConfig {
+    fn default() -> Self {
+        Self {
+            num_workers: num_cpus::get(),
+            work_stealing: true,
+            numa_aware: true,
+            queue_size: 1024,
+        }
+    }
+}
+
 /// Configuration manager with hot reloading capabilities
 #[derive(Debug)]
 pub struct ConfigManager {

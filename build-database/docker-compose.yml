@@ -1,29 +1,146 @@
 version: '3.8'
 
 services:
+  # Main AuroraDB database service
   auroradb:
     build:
       context: .
       dockerfile: Dockerfile
+    container_name: auroradb
     ports:
-      - "8080:8080"
+      - "5433:5433"    # PostgreSQL wire protocol
+      - "8080:8080"    # HTTP REST API
+      - "9090:9090"    # Binary protocol
+      - "9091:9091"    # Prometheus metrics
+      - "8081:8081"    # Health checks
     volumes:
-      - ./data:/app/data
-      - ./config:/app/config:ro
+      - aurora_data:/var/lib/aurora
+      - aurora_logs:/var/log/aurora
+      - aurora_config:/etc/aurora
     environment:
       - RUST_LOG=info
-      - AURORADB_DATA_DIR=/app/data
+      - RUST_BACKTRACE=1
+      - AURORA_CONFIG=/etc/aurora/config.toml
+    restart: unless-stopped
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      test: ["CMD", "curl", "-f", "-s", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
+      start_period: 60s
       retries: 3
-      start_period: 40s
-    restart: unless-stopped
+    networks:
+      - aurora-network
+    depends_on:
+      - aurora-init
 
-  # Optional: PostgreSQL for comparison/benchmarking
+  # Database initialization service
+  aurora-init:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: aurora-init
+    command: ["/bin/bash", "-c", "echo 'AuroraDB initialization complete' && sleep 5"]
+    volumes:
+      - aurora_data:/var/lib/aurora
+      - aurora_logs:/var/log/aurora
+      - aurora_config:/etc/aurora
+    networks:
+      - aurora-network
+
+  # Prometheus monitoring
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: aurora-prometheus
+    ports:
+      - "9092:9090"
+    volumes:
+      - ./deployment/monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - aurora-network
+    depends_on:
+      - auroradb
+    profiles:
+      - monitoring
+
+  # Grafana dashboard
+  grafana:
+    image: grafana/grafana:latest
+    container_name: aurora-grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./deployment/monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./deployment/monitoring/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-piechart-panel
+    networks:
+      - aurora-network
+    depends_on:
+      - prometheus
+    profiles:
+      - monitoring
+
+  # Load balancer
+  haproxy:
+    image: haproxy:2.7-alpine
+    container_name: aurora-haproxy
+    ports:
+      - "80:80"      # HTTP load balancer
+      - "5432:5432"  # PostgreSQL load balancer
+    volumes:
+      - ./deployment/docker/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - auroradb
+    networks:
+      - aurora-network
+    profiles:
+      - full
+
+  # Log aggregation with Loki
+  loki:
+    image: grafana/loki:latest
+    container_name: aurora-loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - loki_data:/loki
+      - ./deployment/monitoring/loki-config.yml:/etc/loki/local-config.yaml:ro
+    command: -config.file=/etc/loki/local-config.yaml
+    networks:
+      - aurora-network
+    profiles:
+      - logging
+
+  # Log shipping with Promtail
+  promtail:
+    image: grafana/promtail:latest
+    container_name: aurora-promtail
+    volumes:
+      - aurora_logs:/var/log/aurora:ro
+      - ./deployment/monitoring/promtail-config.yml:/etc/promtail/config.yml:ro
+    command: -config.file=/etc/promtail/config.yml
+    networks:
+      - aurora-network
+    depends_on:
+      - loki
+    profiles:
+      - logging
+
+  # PostgreSQL for comparison/benchmarking
   postgres:
     image: postgres:15
+    container_name: aurora-postgres
     ports:
       - "5432:5432"
     environment:
@@ -32,20 +149,47 @@ services:
       POSTGRES_PASSWORD: auroradb123
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./scripts/init_pgvector.sql:/docker-entrypoint-initdb.d/init_pgvector.sql
+      - ./scripts/init_pgvector.sql:/docker-entrypoint-initdb.d/init_pgvector.sql:ro
+    networks:
+      - aurora-network
     profiles:
       - bench
 
-  # Optional: Redis for caching/session management
+  # Redis for caching/session management
   redis:
     image: redis:7-alpine
+    container_name: aurora-redis
     ports:
       - "6379:6379"
     volumes:
       - redis_data:/data
+    command: redis-server --appendonly yes --requirepass auroradb123
+    networks:
+      - aurora-network
     profiles:
       - full
 
 volumes:
+  aurora_data:
+    driver: local
+  aurora_logs:
+    driver: local
+  aurora_config:
+    driver: local
+  prometheus_data:
+    driver: local
+  grafana_data:
+    driver: local
+  loki_data:
+    driver: local
   postgres_data:
+    driver: local
   redis_data:
+    driver: local
+
+networks:
+  aurora-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

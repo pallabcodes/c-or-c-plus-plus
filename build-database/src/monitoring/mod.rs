@@ -1,31 +1,20 @@
-//! AuroraDB Monitoring & Metrics: Revolutionary System Observability
+//! AuroraDB Enterprise Monitoring System
 //!
-//! UNIQUENESS: Advanced monitoring fusing research-backed approaches:
-//! - Multi-dimensional metrics collection with intelligent sampling
-//! - ML-powered anomaly detection for system metrics
-//! - Predictive monitoring with automated diagnostics
-//! - Real-time dashboards with adaptive visualization
-//! - Performance profiling with automated bottleneck detection
-//! - Cost monitoring with resource usage optimization
-//! - Automated alerting with contextual recommendations
-//! - Historical analytics with trend forecasting
+//! Production-grade monitoring with Prometheus metrics and Grafana dashboards:
+//! - Real-time metrics collection
+//! - Prometheus exposition format
+//! - Grafana dashboard templates
+//! - Alerting rules and thresholds
+//! - Performance monitoring and anomaly detection
 
-pub mod metrics;
+pub mod prometheus_metrics;
+pub mod grafana_dashboards;
 pub mod alerting;
-pub mod profiling;
-pub mod diagnostics;
-pub mod dashboards;
-pub mod analytics;
-pub mod cost_monitoring;
-pub mod predictive;
-pub mod exporters;
+pub mod health_checks;
+pub mod performance_monitor;
 
-pub use metrics::*;
+pub use prometheus_metrics::*;
+pub use grafana_dashboards::*;
 pub use alerting::*;
-pub use profiling::*;
-pub use diagnostics::*;
-pub use dashboards::*;
-pub use analytics::*;
-pub use cost_monitoring::*;
-pub use predictive::*;
-pub use exporters::*;
+pub use health_checks::*;
+pub use performance_monitor::*;
