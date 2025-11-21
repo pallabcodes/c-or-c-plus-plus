@@ -1,130 +1,123 @@
-You're absolutely right! While I had initially organized the **graph algorithms** specifically under the graph category, it's important to apply the same thinking to other data structures where relevant. Certain **algorithms/patterns** work efficiently with specific data structures like **arrays, heaps, stacks**, etc., and it's helpful to mention those as well.
+# Production Pattern Recognition System
 
-Let's go ahead and **organize the algorithms** under their **relevant data structures** as I did for **graph algorithms**.
+## Goal
 
----
+Extract ingenious, hacky, god-mode algorithmic techniques from **REAL production codebases** (Node.js, Linux kernel, React, Redis, etc.), document ALL variants, and build pattern recognition for when to apply them in production code.
 
-### **Updated Structure with Relevant Data Structures for Algorithms**
+**NOT LeetCode problems** - Real implementations from production systems.
 
-#### **1. Arrays and Strings**
-Many algorithms work directly on **arrays and strings**, so let's group the applicable algorithms here.
+## Structure
 
-##### **Algorithms:**
-- **Sorting and Searching Algorithms:**
-  - Merge Sort, Quick Sort, Binary Search, etc.
-  - **Problems:**
-    - Kth Smallest Element in an Array (Quickselect)
-    - Search in Rotated Sorted Array (Binary Search)
-  
-- **Sliding Window** (works on Arrays, Strings, and Deques)
-  - Maximum Subarray Sum (K elements)
-  - Minimum Window Substring
+```
+algorithms/
+├── production_patterns/           # Extracted from real codebases
+│   ├── binary_search/             # Binary search variants
+│   │   ├── variants/             # All implementation variants
+│   │   │   ├── standard.cpp
+│   │   │   ├── v8_hash_based.cpp
+│   │   │   ├── icu_hybrid.cpp
+│   │   │   ├── linux_kernel.cpp
+│   │   │   └── v8_overflow_safe.cpp
+│   │   └── PATTERN_RECOGNITION.md
+│   ├── sliding_window/            # Sliding window variants
+│   │   ├── variants/
+│   │   │   ├── linux_kfifo.cpp
+│   │   │   ├── brotli_ring_buffer.cpp
+│   │   │   └── v8_simple_ring_buffer.cpp
+│   │   └── PATTERN_RECOGNITION.md
+│   ├── two_pointers/             # Two pointers variants
+│   │   └── PATTERN_RECOGNITION.md
+│   └── k_way_merge/              # K-way merge variants
+│       └── PATTERN_RECOGNITION.md
+├── extraction_notes/              # Notes from analyzing codebases
+│   ├── NODE_V8_ANALYSIS.md
+│   └── LINUX_KERNEL_ANALYSIS.md
+├── PRODUCTION_PATTERN_RECOGNITION.md  # Main methodology
+└── PATTERN_DECISION_TREE.md      # Master decision tree
+```
 
-- **Two Pointers** (commonly used with Arrays and Strings)
-  - Pair with Target Sum
-  - Trapping Rainwater
+## Quick Start
 
-- **Greedy Algorithms** (works on Arrays, Lists)
-  - Activity Selection Problem
-  - Job Scheduling
+1. **Identify Problem Characteristics**: Use `PATTERN_DECISION_TREE.md`
+2. **Select Variant**: Choose appropriate variant from pattern directory
+3. **Review Real-World Examples**: See where it's used in production
+4. **Implement**: Use production-grade variant
 
----
+## Extraction Sources
 
-#### **2. Heaps (Priority Queues)**
-Heaps are great for **efficient priority queue management** and often used in algorithms like **Dijkstra's Algorithm**, **K-th Largest/Smallest**, and **Median Maintenance**.
+We extract patterns from **multiple sources**:
+- **Local Codebases**: Linux kernel, Node.js/V8
+- **GitHub Repositories**: Redis, PostgreSQL, nginx, React, MongoDB, etc.
+- **Research Papers**: ACM, IEEE, arXiv
+- **Technical Blogs**: Engineering blogs from major tech companies
 
-##### **Algorithms:**
-- **Heap Algorithms:**
-  - Merge K Sorted Lists
-  - Kth Largest Element in an Array
-  - Median of a Stream
+See `SOURCE_TRACKING.md` for complete source list.
 
-- **Greedy Algorithms** (works with Heaps):
-  - Huffman Coding
-  - Dijkstra’s Algorithm
+## Patterns Extracted
 
----
+### Binary Search (6 Variants)
+- **Standard**: Generic binary search
+- **V8 Hash-Based**: Hash comparison + linear scan for collisions
+- **ICU Hybrid**: Binary until small, then linear
+- **V8 Overflow-Safe**: Conditional mid calculation
+- **V8 Small Array**: Linear for ≤8 elements
 
-#### **3. Stacks and Queues**
-These data structures are fundamental for algorithms that involve **depth-first search (DFS)**, **breadth-first search (BFS)**, or **expression parsing**.
+**Sources**: V8, ICU, Linux kernel
 
-##### **Algorithms:**
-- **Stack-based Algorithms:**
-  - Valid Parentheses
-  - Daily Temperature Problem
-  - Reverse Polish Notation Evaluation
+### Sliding Window (3 Variants)
+- **Linux kfifo**: Lock-free ring buffer, power-of-2 optimization
+- **Brotli Ring Buffer**: Tail duplication for compression
+- **V8 Simple Ring Buffer**: Constexpr, small fixed-size
 
-- **Queue-based Algorithms:**
-  - Sliding Window Maximum (using Deque)
-  - BFS in Graphs (for level-wise traversal)
+**Sources**: Linux kernel, Brotli, V8
 
-- **Backtracking** (commonly uses stacks to track recursion state)
-  - N-Queens Problem
-  - Subset Sum Problem
+### Two Pointers (5 Variants)
+- **Opposite Ends**: Sorted array, pairs/triplets
+- **Fast/Slow**: Linked list, cycle detection
+- **Same Direction**: Remove duplicates
+- **Sliding Window**: Variable size window
+- **Merge Pattern**: Two sorted sequences
 
----
+**Sources**: Generic patterns, Floyd's algorithm
 
-#### **4. Dynamic Programming (DP)**
-Dynamic Programming can be applied in many cases, but it's often used in combination with **Arrays** and **Lists** to solve optimization problems like **Knapsack**, **Longest Increasing Subsequence**, **Edit Distance**, etc.
+### K-way Merge (4 Variants)
+- **Two Pointers**: K=2 merge
+- **Heap-Based**: Small K, priority queue
+- **Divide-and-Conquer**: Large K, recursive
+- **Streaming**: External sort, doesn't fit in memory
 
-##### **Algorithms:**
-- **Dynamic Programming Problems:**
-  - Knapsack Problem (1D/2D DP)
-  - Longest Palindromic Subsequence
-  - Longest Increasing Subsequence
-  - Decode Ways
-  - Coin Change Problem
-  
----
+**Sources**: Generic patterns, external sorting
 
-#### **5. Trees**
-**Tree-based algorithms** often work with **binary trees**, **binary search trees (BSTs)**, **tries**, and **segment trees**. Many classical problems like **lowest common ancestor (LCA)**, **tree traversals**, and **balanced trees** come into play here.
+## Key Principles
 
-##### **Algorithms:**
-- **Tree Traversals:**
-  - Inorder, Preorder, Postorder DFS
-  - Level Order Traversal (BFS)
+1. **Extract from Production**: Real codebases, not LeetCode
+2. **Document Variants**: All ways to implement, including ingenious ones
+3. **Pattern Recognition**: Know WHEN to use each variant
+4. **Real-World Examples**: Where it's actually used in production
 
-- **Binary Search Trees (BST):**
-  - Valid BST
-  - Kth Smallest Element in BST
-  - Lowest Common Ancestor in BST
+## Usage
 
-- **Backtracking on Trees:**
-  - N-Queens on an NxN grid (Backtracking on trees)
-  - Construct Binary Tree from Preorder and Inorder Traversal
+### For Binary Search:
+```cpp
+// Check PATTERN_DECOGNITION.md for variant selection
+// Then use appropriate variant from variants/ directory
+```
 
----
+### For Sliding Window:
+```cpp
+// Check PATTERN_RECOGNITION.md for variant selection
+// Then use appropriate variant from variants/ directory
+```
 
-#### **6. Graphs**
-Graphs are often used for **network flow**, **shortest path** problems, **topological sorting**, and **graph traversal** algorithms.
+## Next Steps
 
-##### **Algorithms:**
-- **Graph Algorithms:**
-  - BFS (Breadth-First Search)
-  - DFS (Depth-First Search)
-  - Dijkstra’s Algorithm (Single Source Shortest Path)
-  - Bellman-Ford Algorithm
-  - Kruskal’s and Prim’s Algorithms (MST)
+1. Extract hash tables from Redis, PostgreSQL, Linux kernel, research papers
+2. Extract tree patterns (red-black trees, B-trees) from multiple sources
+3. Extract graph algorithms from React, LLVM, research papers
+4. Expand source coverage (more GitHub repos, more research papers)
+5. Build interactive decision tools
+6. Create comprehensive pattern library
 
-- **Topological Sorting** (works with Directed Acyclic Graphs, or DAGs):
-  - Topological Sort (DFS)
-  - Course Schedule Problem (Cycle Detection)
+## Extraction Methodology
 
-- **Union Find / Disjoint Set**:
-  - Find the Connected Components in a Graph
-  - Cycle Detection in Undirected Graphs
-
----
-
-### **Summary:**
-I've now grouped the **algorithms and patterns** based on **their related data structures** where applicable. This should help in understanding how different **algorithms** rely on and utilize various **data structures**. 
-
-For instance:
-- **Graphs**: BFS, DFS, Dijkstra, Kruskal, Prim, etc.
-- **Arrays/Strings**: Sliding Window, Two Pointers, Sorting, Searching, etc.
-- **Heaps**: Kth Largest Element, Median of Stream, Dijkstra’s Algorithm, etc.
-- **Stacks/Queues**: BFS, DFS, Sliding Window Maximum, Expression Evaluation, etc.
-
-This organization will not only help you in cracking algorithm-based questions but also sharpen your understanding of which **data structures** are most efficient for solving specific types of problems.
-
+See `EXTRACTION_METHODOLOGY.md` for detailed multi-source extraction process.

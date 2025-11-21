@@ -1,48 +1,65 @@
+/*
+ * Object-Oriented Programming: Structs and Interfaces
+ *
+ * Demonstrates struct usage and interface implementation using abstract classes.
+ */
 #include <iostream>
+#include <string>
+#include <cassert>
 
-using namespace std;
+// Thread-safety: Not thread-safe (mutable state)
+// Ownership: Owns string member
+// Invariants: Name must be non-empty, Age > 0
+// Failure modes: Undefined behavior if invariants violated
+struct Person {
+    std::string Name;
+    int Age;
 
-// C++ Struct Example (although struct can hold both data and methods, a struct should ideally only hold data/fields)
-struct Person
-{
-  string Name;
-  int Age;
-
-  void Introduce()
-  {
-    cout << "Hello, my name is " << Name << " and I'm " << Age << " years old." << std::endl;
-  }
+    // Thread-safety: Not thread-safe (may modify state via output)
+    // Ownership: None
+    // Invariants: Name must be non-empty, Age > 0
+    // Failure modes: Undefined behavior if Name is empty or Age <= 0
+    void Introduce() const {
+        assert(!Name.empty() && "Name must be non-empty");
+        assert(Age > 0 && "Age must be positive");
+        std::cout << "Hello, my name is " << Name << " and I'm " << Age
+                  << " years old." << std::endl;
+    }
 };
 
-// C++ Interface Example (using an abstract class instead of a formal interface, as it does not implement the methods)
-class ISpeaker
-{
+// Thread-safety: Not thread-safe (abstract interface)
+// Ownership: Abstract base class, does not own derived objects
+// Invariants: None
+// Failure modes: None
+class ISpeaker {
 public:
-  virtual void Speak() = 0;      // Pure virtual function makes this class abstract
-  virtual ~ISpeaker() = default; // Virtual destructor for safe polymorphic deletion
+    virtual void Speak() = 0;
+    virtual ~ISpeaker() = default;
 };
 
-// Concrete class implementing the ISpeaker interface
-class Speaker : public ISpeaker
-{
+// Thread-safety: Not thread-safe (may modify state via output)
+// Ownership: Owns no resources
+// Invariants: None
+// Failure modes: None
+class Speaker : public ISpeaker {
 public:
-  void Speak() override
-  {
-    cout << "Speaking..." << std::endl;
-  }
+    // Thread-safety: Not thread-safe (may modify state via output)
+    // Ownership: None
+    // Invariants: None
+    // Failure modes: None
+    void Speak() override {
+        std::cout << "Speaking..." << std::endl;
+    }
 };
 
-int main()
-{
-  // Creating a Person struct instance
-  Person person;
-  person.Name = "John Doe";
-  person.Age = 30;
-  person.Introduce(); // Output: Hello, my name is John Doe and I'm 30 years old.
+int main() {
+    Person person;
+    person.Name = "John Doe";
+    person.Age = 30;
+    person.Introduce();
 
-  // Creating a Speaker object and calling the Speak method
-  Speaker speaker;
-  speaker.Speak(); // Output: Speaking...
+    Speaker speaker;
+    speaker.Speak();
 
-  return 0;
+    return 0;
 }

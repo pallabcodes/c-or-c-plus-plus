@@ -1,113 +1,191 @@
-# Code Quality Standards for IDE Systems
+# Code Quality Standards for IDE Development
 
-## Scope
-Applies to all IDE code in this directory. Extends repository root rules.
+## Overview
+This document defines production grade code quality standards for IDE implementations. These standards ensure code is suitable for principal level review and production deployment in high performance IDE systems.
 
-## Code Review Context
-This code is expected to undergo line by line scrutiny by principal level reviewers from top tier IDE companies like Microsoft (VSCode), JetBrains (IntelliJ), and open source leaders. Every line must demonstrate production grade quality, clarity, and maintainability comparable to internal implementations at these companies.
+## Function Size Limits
+* **Maximum function length**: 50 lines (excluding comments and blank lines)
+* **Rationale**: Functions exceeding 50 lines become difficult to understand, test, and maintain
+* **Enforcement**: All functions must be reviewed for size compliance
+* **Exception**: Complex algorithms (e.g., parsing, rendering) may extend to 60 lines with justification
 
-## Code Quality Dimensions
+## File Size Limits
+* **Maximum file length**: 200 lines (excluding comments and blank lines)
+* **Rationale**: Files exceeding 200 lines become difficult to navigate and understand
+* **Enforcement**: Split large files into logical modules
+* **Exception**: Header files with extensive type definitions may extend to 250 lines
 
-### Readability
-* Code must be immediately understandable without extensive documentation
-* Variable and function names must be self documenting and convey intent clearly
-* Avoid abbreviations unless they are industry standard or clearly documented (e.g., LSP, AST, DAP)
-* Use consistent naming conventions throughout all files
-* Group related operations logically with clear separation between sections
-* Use whitespace strategically to improve visual structure
-* Follow IDE specific naming conventions for components (e.g., buffer, viewport, symbol)
+## Cyclomatic Complexity
+* **Maximum complexity**: 10 per function
+* **Rationale**: High complexity indicates functions doing too much
+* **Measurement**: Count decision points (if, while, for, switch, &&, ||, ?:)
+* **Enforcement**: Refactor complex functions into smaller, focused functions
+* **Exception**: Complex UI event handlers may have complexity up to 15 with justification
 
-### Maintainability
-* Code must be easy to modify and extend without breaking existing functionality
-* Functions must have single, well defined responsibilities
-* Avoid deep nesting; prefer early returns and guard clauses
-* Minimize coupling between IDE components
-* Use constants and configuration values instead of magic numbers
-* Document assumptions and dependencies clearly
-* Design for extensibility with plugin architectures where appropriate
+## Code Style
 
-### Debuggability
-* Error messages must provide actionable information for debugging
-* Use structured logging with appropriate log levels
-* Include context in error messages to trace execution paths
-* Ensure all error conditions are testable [[] reproducible
-* Provide clear failure modes that aid in root cause analysis
-* Use assertion like checks for invariants that should never occur
-* Include UI context in error messages for user facing features
+### Naming Conventions
+* **Functions**: `snake_case` (e.g., `insert_text`, `delete_range`, `parse_document`)
+* **Classes**: `PascalCase` (e.g., `TextBuffer`, `LanguageServer`, `SyntaxHighlighter`)
+* **Types**: `snake_case` with `_t` suffix (e.g., `buffer_t`, `token_t`)
+* **Constants**: `UPPER_SNAKE_CASE` (e.g., `MAX_BUFFER_SIZE`, `DEFAULT_TAB_SIZE`)
+* **Rationale**: Consistent naming improves readability and maintainability
 
-## Size Constraints
+### Indentation
+* **Indentation**: 4 spaces (no tabs)
+* **Continuation**: Align continuation lines with opening delimiter
+* **Rationale**: Consistent indentation improves readability
 
-### Function Length
-* Maximum function length: 50 lines including comments and whitespace
-* If a function exceeds 50 lines, it must be refactored into smaller, focused functions
-* Each function should accomplish one clearly defined task
-* Complex operations like code analysis should be decomposed into helper functions with descriptive names
+### Comments
+* **Function comments**: Required for all public functions
+* **Algorithm explanation**: Document complex algorithms (parsing, rendering)
+* **Performance notes**: Document performance characteristics
+* **Thread safety**: Document thread safety guarantees
+* **Rationale**: Comments clarify intent and performance characteristics
 
-### File Length
-* Maximum file length: 200 lines including comments and whitespace
-* Files exceeding 200 lines should be split into logical modules
-* Each file should have a single, well defined purpose
-* Related functions and data structures should be grouped within appropriate header and implementation files
+## Error Handling
 
-### Cyclomatic Complexity
-* Maximum cyclomatic complexity per function: 10
-* Functions with complexity over 10 must be refactored to reduce branching
-* Use early returns and guard clauses to reduce nesting
-* Extract complex conditions into well named boolean functions
-* Parsing and code analysis logic should be modularized
+### Input Validation
+* **All public APIs**: Must validate inputs
+* **Null pointers**: Check and return error for NULL inputs
+* **Bounds checking**: Validate array bounds and indices
+* **Text positions**: Validate text positions and ranges
+* **Rationale**: Prevents crashes and undefined behavior
 
-## Review Standards
-* Assume line by line scrutiny by principal level reviewers
-* Favor clarity over cleverness in all implementations
-* Document tradeoffs and rationale for non trivial decisions
-* Keep code minimal and focused on demonstrating single concepts
-* Reference research papers when implementing algorithms from academic literature
-* Reference open source implementations when appropriate
+### Error Reporting
+* **Return codes**: Use consistent return code conventions
+* **Error codes**: Define error codes in header files
+* **Status propagation**: Propagate errors correctly through call stack
+* **User feedback**: Provide clear error messages to users
+* **Rationale**: Clear error reporting aids debugging and user experience
 
-## Style Guidelines
-* Keep examples minimal and focused on one IDE concept per file
-* Add concise comments only where intent or ordering is non obvious
-* Use meaningful names for IDE objects, buffers, and symbols
-* Prefer early returns and shallow nesting to reduce complexity
-* Follow IDE terminology consistently (e.g., buffer, viewport, caret, selection)
+### Error Recovery
+* **Graceful degradation**: Handle errors without crashing
+* **Partial success**: Handle partial operation success correctly
+* **State consistency**: Maintain consistent state on errors
+* **Rationale**: Robust error handling improves reliability
 
-## Documentation Requirements
-* Explain IDE algorithms being used with brief context
-* Document performance characteristics and complexity analysis
-* Explain UI update mechanisms and their purpose
-* Keep functions focused on single IDE operations
-* Reference research papers when implementing academic algorithms
-* Reference open source projects when borrowing implementation patterns
-* Document invariants and constraints for data structures
+## Memory Safety
+
+### Allocation
+* **Stack allocation**: Prefer stack allocation for small, fixed size structures
+* **Heap allocation**: Use heap allocation for dynamic structures
+* **RAII**: Use RAII for C++ (smart pointers, containers)
+* **Buffer sizes**: Use constants for buffer sizes, avoid magic numbers
+* **Rationale**: Proper allocation prevents leaks and improves performance
+
+### Bounds Checking
+* **Array access**: Always validate array indices
+* **Buffer writes**: Check buffer capacity before writes
+* **Text positions**: Validate text positions before access
+* **Rationale**: Bounds checks prevent buffer overflows and crashes
+
+### Leak Prevention
+* **Allocation pairs**: Every allocation must have corresponding deallocation
+* **Error paths**: Free resources in all error paths
+* **Destructors**: Implement proper destructors for C++
+* **Smart pointers**: Use smart pointers in C++ to prevent leaks
+* **Rationale**: Memory leaks cause resource exhaustion
 
 ## Performance Requirements
-* Profile critical paths and record findings
-* Optimize for responsive UI (target < 16ms per frame for 60 FPS)
-* Use appropriate data structures for access patterns
-* Minimize allocations in hot paths
-* Consider incremental algorithms for real time operations
-* Virtual scrolling for large files and views
 
-## UI Responsiveness
-* Keep UI thread operations fast
-* Defer heavy computations to background threads
-* Use incremental updates for UI rendering
-* Minimize blocking operations
-* Progressive rendering for large documents
+### Responsiveness
+* **UI responsiveness**: Maintain 60 FPS rendering
+* **Text operations**: Sub-millisecond edit operations
+* **Background processing**: Non-blocking background operations
+* **Rationale**: Responsiveness is critical for user experience
 
-## Integration with Other Rules
-This file provides general quality standards. For specific guidance, refer to:
-* `text-editor-core.md` for text buffer and editing implementation
-* `language-server-protocol.md` for LSP implementation
-* `syntax-highlighting.md` for highlighting and tokenization
-* `code-completion.md` for IntelliSense and autocomplete
-* `code-navigation.md` for symbol resolution and navigation
-* `refactoring.md` for code transformation operations
-* `debugging-support.md` for debugger integration
-* `build-system-integration.md` for compiler and build tool integration
-* `source-control.md` for version control integration
-* `extensibility.md` for plugin architecture
-* `performance-optimization.md` for performance tuning
-* `ui-rendering.md` for text and graphics rendering
-* `testing-validation.md` for test coverage requirements
+### Memory Efficiency
+* **Virtual scrolling**: Use virtual scrolling for large files
+* **Lazy loading**: Load content on demand
+* **Memory pools**: Use memory pools for frequent allocation
+* **Rationale**: Memory efficiency enables handling large codebases
 
+### Optimization
+* **Hot paths**: Optimize frequently executed code paths
+* **Common cases**: Fast path for common operations
+* **Cache efficiency**: Design for cache friendly memory layout
+* **SIMD**: Use SIMD optimizations where applicable
+* **Rationale**: Performance is critical for IDE responsiveness
+
+## Testing
+
+### Unit Tests
+* **Coverage**: Aim for 90%+ code coverage
+* **Operations**: Test all text editing operations
+* **Edge cases**: Test boundary conditions and error cases
+* **Performance**: Test performance characteristics
+* **Rationale**: Comprehensive testing ensures correctness
+
+### Integration Tests
+* **End to end**: Test complete workflows
+* **UI tests**: Test UI interactions
+* **Language features**: Test language server integration
+* **Rationale**: Integration tests verify system behavior
+
+### Performance Tests
+* **Benchmarks**: Benchmark performance critical operations
+* **Scalability**: Test with large files and codebases
+* **Responsiveness**: Test UI responsiveness
+* **Rationale**: Performance tests ensure performance goals
+
+## Documentation
+
+### API Documentation
+* **Public functions**: Document all public functions
+* **Parameters**: Document all parameters and return values
+* **Performance**: Document performance characteristics
+* **Thread safety**: Document thread safety guarantees
+* **Examples**: Provide usage examples
+* **Rationale**: Clear documentation enables correct usage
+
+### Implementation Documentation
+* **Algorithms**: Document complex algorithms
+* **Design decisions**: Document non obvious design choices
+* **Trade offs**: Document design trade offs
+* **Rationale**: Implementation docs aid maintenance
+
+## Examples
+
+### Good Function (Within Limits)
+```cpp
+// Thread safety: Not thread safe (caller must synchronize)
+// Ownership: Caller owns buffer, returns success/failure
+// Performance: O(n) where n is text length
+// Failure modes: Returns false on invalid position or allocation failure
+bool insert_text(TextBuffer* buffer, size_t position, const char* text, size_t length) {
+    if (!buffer || !text || length == 0) {
+        return false;
+    }
+    
+    if (position > buffer->size) {
+        return false;
+    }
+    
+    return buffer_insert_internal(buffer, position, text, length);
+}
+```
+
+### Bad Function (Exceeds Limits)
+```cpp
+// BAD: Function exceeds 50 lines and has high complexity
+bool complex_text_operation(TextBuffer* buffer, ...) {
+    // 60+ lines of complex logic with nested conditionals
+    // High cyclomatic complexity (> 10)
+    // Difficult to test and maintain
+}
+```
+
+## Enforcement
+
+### Code Review
+* **Mandatory**: All code must be reviewed for compliance
+* **Checklist**: Use checklist to verify standards
+* **Automation**: Use tools to check function/file sizes and complexity
+
+### CI/CD
+* **Static analysis**: Run static analysis tools in CI
+* **Linting**: Run linters to check style compliance
+* **Testing**: Run tests to verify correctness
+* **Performance**: Run performance benchmarks
+* **Metrics**: Track code quality metrics over time

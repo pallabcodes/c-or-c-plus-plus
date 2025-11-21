@@ -36,6 +36,11 @@ This module contains the most advanced, hacky, ingenious, and god-modded bash te
 - **Focus**: CPU optimization, memory management, I/O optimization
 - **God-Modded**: Assembly integration, custom allocators, zero-copy techniques
 
+### 6.7 God-Modded Techniques (`07-god-modded-techniques.sh`)
+- **Topics**: Binary manipulation, advanced IPC, security techniques, debugging hacks
+- **Focus**: ELF parsing, binary patching, signal-based IPC, process manipulation
+- **God-Modded**: Binary protocol handling, core dump analysis, extended attributes, ACL manipulation
+
 ## Advanced Techniques Covered
 
 ### System-Level Hacks
@@ -69,6 +74,36 @@ This module contains the most advanced, hacky, ingenious, and god-modded bash te
 - Infrastructure automation
 - Service discovery
 - Auto-scaling mechanisms
+
+### Binary Manipulation
+- ELF binary parsing and analysis
+- Binary patching and modification
+- String extraction from binaries
+- Binary protocol handling
+
+### Advanced IPC
+- Shared memory using /dev/shm
+- Message queues with named pipes
+- Semaphores using file locks
+- Signal-based IPC
+
+### Advanced Debugging
+- GDB automation and scripting
+- Core dump analysis
+- Process memory inspection
+- Advanced debugging techniques
+
+### File System Hacks
+- Extended attributes manipulation
+- Inode manipulation
+- ACL (Access Control List) manipulation
+- Advanced file system operations
+
+### Process Manipulation
+- Process checkpointing and migration
+- Advanced process monitoring
+- Process memory inspection
+- Signal manipulation
 
 ## Target Audience
 - **Distributive Backend Engineers**: Microservices, distributed systems

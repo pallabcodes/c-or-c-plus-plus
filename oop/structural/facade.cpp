@@ -1,99 +1,132 @@
+/*
+ * Structural Pattern: Facade
+ *
+ * Demonstrates the Facade pattern for providing a simplified interface to
+ * a complex subsystem.
+ */
 #include <iostream>
+#include <cassert>
 
-class SmartHomeSubSystem
-{
-
+// Thread-safety: Not thread-safe (mutable state, no synchronization)
+// Ownership: Owns no resources
+// Invariants: temperature must be in valid range (e.g., -50 to 50)
+// Failure modes: Undefined behavior if invariants violated
+class SmartHomeSubSystem {
 public:
-  enum class Brightness
-  {
-    UNKNOWN,
-    BRIGHT,
-    DIM
-  };
+    enum class Brightness {
+        UNKNOWN,
+        BRIGHT,
+        DIM
+    };
 
-  enum class Service
-  {
-    UNKNOWN,
-    HULU,
-    NETFLIX,
-    HBO
-  };
+    enum class Service {
+        UNKNOWN,
+        HULU,
+        NETFLIX,
+        HBO
+    };
 
-  SmartHomeSubSystem()
-      : brightness(Brightness::UNKNOWN),
-        temperature(19),
-        isSecurityArmed(false),
-        streamingService(Service::UNKNOWN) {}
+    // Thread-safety: Not thread-safe (constructor modifies object)
+    // Ownership: Initializes members
+    // Invariants: temperature must be in valid range
+    // Failure modes: None
+    SmartHomeSubSystem()
+        : brightness_(Brightness::UNKNOWN),
+          temperature_(19),
+          isSecurityArmed_(false),
+          streamingService_(Service::UNKNOWN) {}
 
-  void setBrightness(Brightness brightness)
-  {
-    this->brightness = brightness;
-  }
+    // Thread-safety: Not thread-safe (modifies brightness_)
+    // Ownership: None
+    // Invariants: None
+    // Failure modes: None
+    void setBrightness(Brightness brightness) {
+        brightness_ = brightness;
+    }
 
-  void setTemperature(int temperature)
-  {
-    this->temperature = temperature;
-  }
+    // Thread-safety: Not thread-safe (modifies temperature_)
+    // Ownership: None
+    // Invariants: temperature must be in valid range
+    // Failure modes: Undefined behavior if temperature out of range
+    void setTemperature(int temperature) {
+        assert(temperature >= -50 && temperature <= 50 && "Temperature out of range");
+        temperature_ = temperature;
+    }
 
-  void setIsSecurityArmed(bool isSecurityArmed)
-  {
-    this->isSecurityArmed = isSecurityArmed;
-  }
+    // Thread-safety: Not thread-safe (modifies isSecurityArmed_)
+    // Ownership: None
+    // Invariants: None
+    // Failure modes: None
+    void setIsSecurityArmed(bool isSecurityArmed) {
+        isSecurityArmed_ = isSecurityArmed;
+    }
 
-  void setStreamingService(Service streamingService)
-  {
-    this->streamingService = streamingService;
-  }
+    // Thread-safety: Not thread-safe (modifies streamingService_)
+    // Ownership: None
+    // Invariants: None
+    // Failure modes: None
+    void setStreamingService(Service streamingService) {
+        streamingService_ = streamingService;
+    }
 
 private:
-  void enableMotionSensors()
-  {
-    // ...
-  }
+    void enableMotionSensors() {
+        // Implementation
+    }
 
-  void updateFirmware()
-  {
-    // ...
-  }
+    void updateFirmware() {
+        // Implementation
+    }
 
-  Brightness brightness;
-  int temperature;
-  bool isSecurityArmed;
-  Service streamingService;
+    Brightness brightness_;
+    int temperature_;
+    bool isSecurityArmed_;
+    Service streamingService_;
 };
 
-class SmartHomeFacade
-{
+// Thread-safety: Not thread-safe (modifies subsystem)
+// Ownership: Borrows smartHome reference
+// Invariants: smartHome must be valid
+// Failure modes: Undefined behavior if smartHome is invalid
+class SmartHomeFacade {
+private:
+    SmartHomeSubSystem& smartHome_;
 
 public:
-  SmartHomeFacade(SmartHomeSubSystem &smartHome) : smartHome(smartHome) {}
+    // Thread-safety: Not thread-safe (constructor stores reference)
+    // Ownership: Borrows smartHome reference
+    // Invariants: smartHome must be valid
+    // Failure modes: Undefined behavior if smartHome is invalid
+    explicit SmartHomeFacade(SmartHomeSubSystem& smartHome) : smartHome_(smartHome) {}
 
-  void setMovieMode()
-  {
-    smartHome.setBrightness(SmartHomeSubSystem::Brightness::DIM);
-    smartHome.setTemperature(21);
-    smartHome.setIsSecurityArmed(false);
-    smartHome.setStreamingService(SmartHomeSubSystem::Service::NETFLIX);
-  }
+    // Thread-safety: Not thread-safe (modifies smartHome_)
+    // Ownership: None
+    // Invariants: None
+    // Failure modes: None
+    void setMovieMode() {
+        smartHome_.setBrightness(SmartHomeSubSystem::Brightness::DIM);
+        smartHome_.setTemperature(21);
+        smartHome_.setIsSecurityArmed(false);
+        smartHome_.setStreamingService(SmartHomeSubSystem::Service::NETFLIX);
+    }
 
-  void setFocusMode()
-  {
-    smartHome.setBrightness(SmartHomeSubSystem::Brightness::BRIGHT);
-    smartHome.setTemperature(22);
-    smartHome.setIsSecurityArmed(true);
-    smartHome.setStreamingService(SmartHomeSubSystem::Service::UNKNOWN);
-  }
-
-private:
-  SmartHomeSubSystem &smartHome;
+    // Thread-safety: Not thread-safe (modifies smartHome_)
+    // Ownership: None
+    // Invariants: None
+    // Failure modes: None
+    void setFocusMode() {
+        smartHome_.setBrightness(SmartHomeSubSystem::Brightness::BRIGHT);
+        smartHome_.setTemperature(22);
+        smartHome_.setIsSecurityArmed(true);
+        smartHome_.setStreamingService(SmartHomeSubSystem::Service::UNKNOWN);
+    }
 };
 
-int main()
-{
-  SmartHomeSubSystem smartHome;
-  SmartHomeFacade f(smartHome);
-  f.setMovieMode();
-  f.setFocusMode();
+int main() {
+    SmartHomeSubSystem smartHome;
+    SmartHomeFacade facade(smartHome);
+    facade.setMovieMode();
+    facade.setFocusMode();
 
-  return 0;
+    return 0;
 }

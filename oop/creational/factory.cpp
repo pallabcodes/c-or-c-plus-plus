@@ -1,78 +1,155 @@
+/*
+ * Creational Pattern: Factory Method
+ *
+ * Demonstrates the Factory Method pattern for creating burger objects
+ * without specifying their exact classes.
+ */
 #include <iostream>
 #include <string>
 #include <vector>
+#include <memory>
+#include <stdexcept>
+#include <cassert>
 
-enum class Burgers
-{
+enum class Burgers {
     CHEESE,
     DELUXECHEESE,
     VEGAN,
     DELUXEVEGAN
 };
 
-class Burger
-{
+// Thread-safety: Not thread-safe (mutable state)
+// Ownership: Abstract base class, does not own derived objects
+// Invariants: name must be non-empty after construction
+// Failure modes: Undefined behavior if name is empty
+class Burger {
 public:
+    virtual ~Burger() = default;
+
+    // Thread-safety: Not thread-safe (may modify state)
+    // Ownership: None
+    // Invariants: None
+    // Failure modes: None
     virtual void prepare() {}
+
+    // Thread-safety: Not thread-safe (may modify state)
+    // Ownership: None
+    // Invariants: None
+    // Failure modes: None
     virtual void cook() {}
+
+    // Thread-safety: Not thread-safe (may modify state)
+    // Ownership: None
+    // Invariants: None
+    // Failure modes: None
     virtual void serve() {}
-    std::string getName() { return name; }
+
+    // Thread-safety: Thread-safe (const method, returns copy)
+    // Ownership: Returns copy of name
+    // Invariants: None
+    // Failure modes: None
+    std::string getName() const {
+        return name_;
+    }
 
 protected:
-    std::string name;
-    std::string bread;
-    std::string sauce;
-    std::vector<std::string> toppings;
+    std::string name_;
+    std::string bread_;
+    std::string sauce_;
+    std::vector<std::string> toppings_;
 };
 
-class CheeseBurger : public Burger
-{
+// Thread-safety: Not thread-safe (mutable state)
+// Ownership: Owns string members
+// Invariants: name_ must be non-empty after construction
+// Failure modes: Undefined behavior if name_ is empty
+class CheeseBurger : public Burger {
 public:
-    CheeseBurger()
-    {
-        name = "Cheese Burger";
-        // ... set the name, bread, and sauce
+    // Thread-safety: Not thread-safe (constructor modifies object)
+    // Ownership: Initializes string members
+    // Invariants: name_ must be non-empty
+    // Failure modes: None
+    CheeseBurger() {
+        name_ = "Cheese Burger";
+        bread_ = "Sesame Bun";
+        sauce_ = "Special Sauce";
     }
 };
 
-class DeluxeCheeseBurger : public Burger
-{
+// Thread-safety: Not thread-safe (mutable state)
+// Ownership: Owns string members
+// Invariants: name_ must be non-empty after construction
+// Failure modes: Undefined behavior if name_ is empty
+class DeluxeCheeseBurger : public Burger {
 public:
-    DeluxeCheeseBurger()
-    {
-        name = "Deluxe Cheese Burger";
-        // ... set the name, bread, and sauce
+    // Thread-safety: Not thread-safe (constructor modifies object)
+    // Ownership: Initializes string members
+    // Invariants: name_ must be non-empty
+    // Failure modes: None
+    DeluxeCheeseBurger() {
+        name_ = "Deluxe Cheese Burger";
+        bread_ = "Artisan Bun";
+        sauce_ = "Premium Sauce";
     }
 };
 
-class VeganBurger : public Burger
-{
+// Thread-safety: Not thread-safe (mutable state)
+// Ownership: Owns string members
+// Invariants: name_ must be non-empty after construction
+// Failure modes: Undefined behavior if name_ is empty
+class VeganBurger : public Burger {
 public:
-    VeganBurger()
-    {
-        name = "Vegan Burger";
-        // ... set the name, bread, and sauce
+    // Thread-safety: Not thread-safe (constructor modifies object)
+    // Ownership: Initializes string members
+    // Invariants: name_ must be non-empty
+    // Failure modes: None
+    VeganBurger() {
+        name_ = "Vegan Burger";
+        bread_ = "Whole Grain Bun";
+        sauce_ = "Vegan Sauce";
     }
 };
 
-class DeluxeVeganBurger : public Burger
-{
+// Thread-safety: Not thread-safe (mutable state)
+// Ownership: Owns string members
+// Invariants: name_ must be non-empty after construction
+// Failure modes: Undefined behavior if name_ is empty
+class DeluxeVeganBurger : public Burger {
 public:
-    DeluxeVeganBurger()
-    {
-        name = "Deluxe Vegan Burger";
-        // ... set the name, bread, and sauce
+    // Thread-safety: Not thread-safe (constructor modifies object)
+    // Ownership: Initializes string members
+    // Invariants: name_ must be non-empty
+    // Failure modes: None
+    DeluxeVeganBurger() {
+        name_ = "Deluxe Vegan Burger";
+        bread_ = "Artisan Whole Grain Bun";
+        sauce_ = "Premium Vegan Sauce";
     }
 };
 
-class BurgerStore
-{
+// Thread-safety: Not thread-safe (abstract interface)
+// Ownership: Abstract base class, does not own derived objects
+// Invariants: None
+// Failure modes: None
+class BurgerStore {
 public:
-    virtual Burger *createBurger(Burgers item) = 0;
+    virtual ~BurgerStore() = default;
 
-    Burger *orderBurger(Burgers type)
-    {
-        Burger *burger = createBurger(type);
+    // Thread-safety: Not thread-safe (factory method)
+    // Ownership: Returns unique_ptr owning Burger instance
+    // Invariants: None
+    // Failure modes: Returns nullptr if item type not supported
+    virtual std::unique_ptr<Burger> createBurger(Burgers item) = 0;
+
+    // Thread-safety: Not thread-safe (modifies state, calls virtual methods)
+    // Ownership: Returns unique_ptr owning Burger instance
+    // Invariants: type must be valid Burger type
+    // Failure modes: Throws if createBurger returns nullptr
+    std::unique_ptr<Burger> orderBurger(Burgers type) {
+        auto burger = createBurger(type);
+        if (!burger) {
+            throw std::runtime_error("Failed to create burger: unsupported type");
+        }
         std::cout << "--- Making a " << burger->getName() << " ---" << std::endl;
         burger->prepare();
         burger->cook();
@@ -81,60 +158,61 @@ public:
     }
 };
 
-class CheeseBurgerStore : public BurgerStore
-{
+// Thread-safety: Not thread-safe (mutable state)
+// Ownership: Owns no resources
+// Invariants: None
+// Failure modes: Returns nullptr for unsupported burger types
+class CheeseBurgerStore : public BurgerStore {
 public:
-    Burger *createBurger(Burgers item) override
-    {
-        if (item == Burgers::CHEESE)
-        {
-            return new CheeseBurger();
+    // Thread-safety: Not thread-safe (factory method)
+    // Ownership: Returns unique_ptr owning Burger instance
+    // Invariants: None
+    // Failure modes: Returns nullptr if item is not CHEESE or DELUXECHEESE
+    std::unique_ptr<Burger> createBurger(Burgers item) override {
+        if (item == Burgers::CHEESE) {
+            return std::make_unique<CheeseBurger>();
+        } else if (item == Burgers::DELUXECHEESE) {
+            return std::make_unique<DeluxeCheeseBurger>();
         }
-        else if (item == Burgers::DELUXECHEESE)
-        {
-            return new DeluxeCheeseBurger();
-        }
-        else
-        {
-            return nullptr;
-        }
+        return nullptr;
     }
 };
 
-class VeganBurgerStore : public BurgerStore
-{
+// Thread-safety: Not thread-safe (mutable state)
+// Ownership: Owns no resources
+// Invariants: None
+// Failure modes: Returns nullptr for unsupported burger types
+class VeganBurgerStore : public BurgerStore {
 public:
-    Burger *createBurger(Burgers item) override
-    {
-        if (item == Burgers::VEGAN)
-        {
-            return new VeganBurger();
+    // Thread-safety: Not thread-safe (factory method)
+    // Ownership: Returns unique_ptr owning Burger instance
+    // Invariants: None
+    // Failure modes: Returns nullptr if item is not VEGAN or DELUXEVEGAN
+    std::unique_ptr<Burger> createBurger(Burgers item) override {
+        if (item == Burgers::VEGAN) {
+            return std::make_unique<VeganBurger>();
+        } else if (item == Burgers::DELUXEVEGAN) {
+            return std::make_unique<DeluxeVeganBurger>();
         }
-        else if (item == Burgers::DELUXEVEGAN)
-        {
-            return new DeluxeVeganBurger();
-        }
-        else
-        {
-            return nullptr;
-        }
+        return nullptr;
     }
 };
 
-int main()
-{
-    BurgerStore *cheeseStore = new CheeseBurgerStore();
-    BurgerStore *veganStore = new VeganBurgerStore();
+int main() {
+    try {
+        auto cheeseStore = std::make_unique<CheeseBurgerStore>();
+        auto veganStore = std::make_unique<VeganBurgerStore>();
 
-    Burger *burger = cheeseStore->orderBurger(Burgers::CHEESE);
-    std::cout << "Ethan ordered a " << burger->getName() << std::endl;
+        auto burger = cheeseStore->orderBurger(Burgers::CHEESE);
+        std::cout << "Ethan ordered a " << burger->getName() << std::endl;
 
-    burger = veganStore->orderBurger(Burgers::DELUXEVEGAN);
-    std::cout << "Joel ordered a " << burger->getName() << std::endl;
+        burger = veganStore->orderBurger(Burgers::DELUXEVEGAN);
+        std::cout << "Joel ordered a " << burger->getName() << std::endl;
 
-    delete cheeseStore;
-    delete veganStore;
-    delete burger;
+    } catch (const std::exception& e) {
+        std::cerr << "Error: " << e.what() << std::endl;
+        return 1;
+    }
 
     return 0;
 }

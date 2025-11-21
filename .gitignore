@@ -69,6 +69,8 @@ Makefile
 build/
 cmake-build-debug/
 cmake-build-release/
+node/
+linux/
 
 # Ignore CMake generated files
 CMakeFiles/
@@ -117,6 +119,9 @@ install_manifest.txt
 *.gcda
 *.gcno
 *.gcov
+
+# miscellaneous
+/linux
 
 # Ignore temporary files
 *~
